@@ -1,6 +1,12 @@
-var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
+let animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
 	        window.setTimeout(callback, 1000 / 60)
 	    };
+
+function createCanvas() {
+
+}
+
+
 var canvas = document.createElement("canvas");
 var width = 400;
 var height = 600;
@@ -27,9 +33,13 @@ var update = function () {
 	    ball.update(player.paddle, computer.paddle);
 };
 
+var log = function () {
+}
+
 var step = function () {
 	    update();
 	    render();
+			log();
 	    animate(step);
 };
 
@@ -168,3 +178,20 @@ window.addEventListener("keydown", function (event) {
 window.addEventListener("keyup", function (event) {
 	    delete keysDown[event.keyCode];
 });
+
+$( document ).ready(function() {
+
+	let cars = [
+			{ "make":"Porsche", "model":"911S" },
+			{ "make":"Mercedes-Benz", "model":"220SE" },
+			{ "make":"Jaguar","model": "Mark VII" }
+	];
+
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: "/receiver",
+		data: JSON.stringify(cars)
+	}).done(function(data) {
+			console.log("success")
+	});
