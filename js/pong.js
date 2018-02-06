@@ -1,17 +1,20 @@
+let CANVAS_WIDTH = 400;
+let CANVAS_HEIGHT = 600;
+
 let animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
-	        window.setTimeout(callback, 1000 / 60)
-	    };
+	window.setTimeout(callback, 1000 / 60)
+};
 
-function createCanvas() {
+let createCanvas = function(width, height) {
+	let canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
 
+	return canvas;
 }
 
+let canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-var canvas = document.createElement("canvas");
-var width = 400;
-var height = 600;
-canvas.width = width;
-canvas.height = height;
 var context = canvas.getContext('2d');
 var player = new Player();
 var computer = new Computer();
@@ -21,7 +24,7 @@ var keysDown = {};
 
 var render = function () {
 	    context.fillStyle = "#000000";
-	    context.fillRect(0, 0, width, height);
+	    context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 	    player.render();
 	    computer.render();
 	    ball.render();
@@ -180,7 +183,6 @@ window.addEventListener("keyup", function (event) {
 });
 
 $( document ).ready(function() {
-
 	let cars = [
 			{ "make":"Porsche", "model":"911S" },
 			{ "make":"Mercedes-Benz", "model":"220SE" },
@@ -193,5 +195,6 @@ $( document ).ready(function() {
 		url: "/receiver",
 		data: JSON.stringify(cars)
 	}).done(function(data) {
-			console.log("success")
+		console.log("done");
 	});
+});
