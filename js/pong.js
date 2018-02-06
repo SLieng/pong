@@ -14,7 +14,7 @@ var ball = new Ball(200, 300);
 var keysDown = {};
 
 var render = function () {
-	    context.fillStyle = "#FF00FF";
+	    context.fillStyle = "#000000";
 	    context.fillRect(0, 0, width, height);
 	    player.render();
 	    computer.render();
@@ -43,7 +43,7 @@ function Paddle(x, y, width, height) {
 }
 
 Paddle.prototype.render = function () {
-	    context.fillStyle = "#0000FF";
+	    context.fillStyle = "#FFFFFF";
 	    context.fillRect(this.x, this.y, this.width, this.height);
 };
 
@@ -96,9 +96,9 @@ Player.prototype.render = function () {
 Player.prototype.update = function () {
 	    for (var key in keysDown) {
 				        var value = Number(key);
-				        if (value == 37) {
+				        if (value == 81) {
 									            this.paddle.move(-4, 0);
-									        } else if (value == 39) {
+									        } else if (value == 87) {
 														            this.paddle.move(4, 0);
 														        } else {
 																			            this.paddle.move(0, 0);
@@ -116,7 +116,7 @@ function Ball(x, y) {
 Ball.prototype.render = function () {
 	    context.beginPath();
 	    context.arc(this.x, this.y, 5, 2 * Math.PI, false);
-	    context.fillStyle = "#000000";
+	    context.fillStyle = "#FF0000";
 	    context.fill();
 };
 
