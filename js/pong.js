@@ -5,20 +5,28 @@ const BALL_RADIUS = 10
 const PADDLE_HEIGHT = 10
 const PADDLE_WIDTH = 80
 
-let keysDown = {right: false, left: false, a: false, d: false}
+let keysDown = {right: false, left: false, a: false, d: false, q: false, w: false}
 
 document.addEventListener('keydown', function(event) {
-    if(event.keyCode == 37) {
-        keysDown.left = true
-    }
-    else if(event.keyCode == 39) {
-        keysDown.right = true
-    }
-    else if (event.keyCode == 65) {
-        keysDown.a = true
-    }
-    else if (event.keyCode == 68) {
+	switch(event.keyCode) {
+		case 37:
+        keysDown.left = true;
+			break;
+		case 39:
+        keysDown.right = true;
+			break;
+		case 65:
+        keysDown.a = true;
+			break;
+		case 68:
         keysDown.d = true
+			break;
+		case 81:
+			keysDown.q = true;
+			break;
+		case 87:
+			keysDown.w = true;
+			break;
     }
 });
 document.addEventListener('keyup', function(event) {
@@ -34,6 +42,15 @@ document.addEventListener('keyup', function(event) {
     else if (event.keyCode == 68) {
         keysDown.d = false
     }
+
+		switch(event.keyCode) {
+			case 81:
+				keysDown.q = false;
+				break;
+			case 87:
+				keysDown.w = false;
+				break;
+		}
 });
 
 //Vector
@@ -41,6 +58,7 @@ function Vector(x,y) {
     this.x = x
     this.y = y
 }
+
 Vector.prototype.plus = function(otherVector) {
     this.x += otherVector.x
     this.y += otherVector.y
@@ -57,16 +75,29 @@ function Ball(initialPos, initialVel) {
 Ball.prototype.update = function() {
     this.pos.plus(this.vel)
 }
-function Player(initialPos, initialVel, id) {
+function Paddle(initialPos, initialVel, id) {
     this.height = PADDLE_HEIGHT
     this.id = id
     this.pos= initialPos
-    this.type = "player"
+    this.type = "paddle"
     this.vel= initialVel
     this.width = PADDLE_WIDTH
 }
-Player.prototype.update = function() {
+
+Paddle.prototype.update = function() {
     this.pos.plus(this.vel)
+}
+
+Paddle.prototype.cmdMoveLeft = function() {
+	this.vel = new Vector(-5,0);
+}
+
+Paddle.prototype.cmdMoveRight = function() {
+	this.vel = new Vector(5,0);
+}
+
+Paddle.prototype.cmdStop = function() {
+	this.vel = new Vector(0,0);
 }
 
 
@@ -76,7 +107,10 @@ function Game() {
     this.actors = []
     this.active = false
 }
+
 Game.prototype.animate = function (step) {
+	this.readKeyboardInput();
+	
 	if (this.active) {
         //UPDATE ACTORS
         //OLD ACTORS ACT AS PREVIOUS STATE
@@ -108,38 +142,8 @@ Game.prototype.animate = function (step) {
                         actor.vel.x *= -1
                     }
                     break;
-                case "player":
+                case "paddle":
                     actor.pos.plus(actor.vel)
-                    switch (actor.id) {
-                        case 1:
-                            if (keysDown.left && keysDown.right) {
-                                actor.vel = new Vector(0,0)
-                            }
-                            else if (keysDown.left) {
-                                actor.vel = new Vector(-5,0)
-                            } 
-                            else if (keysDown.right) { 
-                                actor.vel = new Vector(5,0)
-                            } 
-                            else {
-                                actor.vel = new Vector(0,0)
-                            }
-                            break;
-                        case 2:
-                            if (keysDown.a && keysDown.d) {
-                                actor.vel = new Vector(0,0)
-                            }
-                            else if (keysDown.a) {
-                                actor.vel = new Vector(-5,0)
-                            } 
-                            else if (keysDown.d) { 
-                                actor.vel = new Vector(5,0)
-                            } 
-                            else {
-                                actor.vel = new Vector(0,0)
-                            }
-                            break;
-                    }
                     
             }
             newActors.push(actor)
@@ -149,10 +153,21 @@ Game.prototype.animate = function (step) {
     }
 }
 Game.prototype.begin = function () {
-    this.actors.push(new Player(new Vector(200,50),new Vector(0,0),1))
-    this.actors.push(new Player(new Vector(200,550),new Vector(0,0),2))
+		this.player = new Paddle(new Vector(200,50),new Vector(0,0),1);
+    this.actors.push(this.player);
+    this.actors.push(new Paddle(new Vector(200,550),new Vector(0,0),2))
     this.actors.push(new Ball(new Vector(160,300),new Vector(0,4)))
     this.active = true
+}
+
+Game.prototype.readKeyboardInput = function () {
+	if (keysDown.a || keysDown.q) {
+		this.player.cmdMoveLeft();
+	} else if (keysDown.d || keysDown.w) {
+		this.player.cmdMoveRight();
+	} else {
+		this.player.cmdStop();
+	}
 }
 
 //////////////////////////////////////////////// PONG WRAPPER
@@ -225,7 +240,7 @@ CanvasDisplay.prototype.drawActors = function () {
         const width = actor.width
 
         switch(actor.type) {
-            case "player":
+            case "paddle":
                 this.cx.fillStyle = "#FF0000";
                 this.cx.fillRect(pos.x - width/2, pos.y - height/2, width, height);
                 break;
