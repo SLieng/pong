@@ -5,6 +5,17 @@ const BALL_RADIUS = 10
 const PADDLE_HEIGHT = 10
 const PADDLE_WIDTH = 80
 
+let keysDown = []
+
+document.addEventListener('keydown', function(event) {
+    if(event.keyCode == 37) {
+        keysDown.push("left")
+    }
+    else if(event.keyCode == 39) {
+        keysDown.push("right")
+    }
+});
+
 //Vector
 function Vector(x,y) {
     this.x = x
@@ -50,7 +61,7 @@ Game.prototype.animate = function () {
         //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
         let newActors = []
-
+        console.log(keysDown)
         function hasCollision(actorA,actorB) {
             let xDistance = Math.abs(actorA.pos.x-actorB.pos.x)
             let yDistance = Math.abs(actorA.pos.y-actorB.pos.y)
@@ -76,12 +87,28 @@ Game.prototype.animate = function () {
                         actor.vel.x *= -1
                     }
                     break;
+                case "player":
+                    actor.pos.plus(actor.vel)
+                    if (keysDown.indexOf("left")>-1 && keysDown.indexOf("right")>-1) {
+                        actor.vel = new Vector(0,0)
+                    }
+                    else if (keysDown.indexOf("left")>-1) {
+                        actor.vel = new Vector(-5,0)
+                    } 
+                    else if (keysDown.indexOf("right")>-1) { 
+                        actor.vel = new Vector(5,0)
+                    } 
+                    else {
+                        actor.vel = new Vector(0,0)
+                    }
             }
             newActors.push(actor)
         })
-        console.log(newActors)
+        
         this.actors = newActors
-	}
+    }
+
+    keysDown = []
 }
 Game.prototype.begin = function () {
     this.actors.push(new Player(new Vector(200,50),new Vector(0,0)))
@@ -89,6 +116,7 @@ Game.prototype.begin = function () {
     this.actors.push(new Ball(new Vector(160,300),new Vector(0,2)))
     this.active = true
 }
+
 //////////////////////////////////////////////// PONG WRAPPER
 function runAnimation(frameFunc) {
 	let lastTime = null;
