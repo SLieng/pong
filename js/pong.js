@@ -30,20 +30,19 @@ document.addEventListener('keydown', function(event) {
     }
 });
 document.addEventListener('keyup', function(event) {
-    if(event.keyCode == 37) {
-        keysDown.left = false
-    }
-    else if(event.keyCode == 39) {
-        keysDown.right = false
-    }
-    else if (event.keyCode == 65) {
-        keysDown.a = false
-    }
-    else if (event.keyCode == 68) {
-        keysDown.d = false
-    }
-
 		switch(event.keyCode) {
+		case 37:
+        keysDown.left = false;
+			break;
+		case 39:
+        keysDown.right = false;
+			break;
+		case 65:
+        keysDown.a = false;
+			break;
+		case 68:
+        keysDown.d = false;
+			break;
 			case 81:
 				keysDown.q = false;
 				break;
@@ -72,16 +71,30 @@ function Ball(initialPos, initialVel) {
     this.vel= initialVel
     this.width = BALL_RADIUS
 }
+
 Ball.prototype.update = function() {
     this.pos.plus(this.vel)
 }
+
+Ball.prototype.outsideBounds = function() {
+	//QUICK FIX
+	if(this.pos.y < 0 || this.pos.y > 600) {
+		return true;
+	}
+	return false;
+}
+
+Ball.prototype.respawn = function() {
+	this.pos = new Vector(300,250);
+}
+
 function Paddle(initialPos, initialVel, id) {
-    this.height = PADDLE_HEIGHT
     this.id = id
     this.pos= initialPos
     this.type = "paddle"
     this.vel= initialVel
     this.width = PADDLE_WIDTH
+    this.height = PADDLE_HEIGHT
 }
 
 Paddle.prototype.update = function() {
@@ -141,6 +154,10 @@ Game.prototype.animate = function (step) {
                     if (actor.pos.x < 0 || actor.pos.x > this.width) {
                         actor.vel.x *= -1
                     }
+
+										if(actor.outsideBounds()) {
+											actor.respawn();
+										}
                     break;
                 case "paddle":
                     actor.pos.plus(actor.vel)
