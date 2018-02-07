@@ -5,14 +5,22 @@ const BALL_RADIUS = 10
 const PADDLE_HEIGHT = 10
 const PADDLE_WIDTH = 80
 
-let keysDown = []
+let keysDown = {right: false, left: false}
 
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37) {
-        keysDown.push("left")
+        keysDown.left = true
     }
     else if(event.keyCode == 39) {
-        keysDown.push("right")
+        keysDown.right = true
+    }
+});
+document.addEventListener('keyup', function(event) {
+    if(event.keyCode == 37) {
+        keysDown.left = false
+    }
+    else if(event.keyCode == 39) {
+        keysDown.right = false
     }
 });
 
@@ -89,13 +97,13 @@ Game.prototype.animate = function () {
                     break;
                 case "player":
                     actor.pos.plus(actor.vel)
-                    if (keysDown.indexOf("left")>-1 && keysDown.indexOf("right")>-1) {
+                    if (keysDown.left && keysDown.right) {
                         actor.vel = new Vector(0,0)
                     }
-                    else if (keysDown.indexOf("left")>-1) {
+                    else if (keysDown.left) {
                         actor.vel = new Vector(-5,0)
                     } 
-                    else if (keysDown.indexOf("right")>-1) { 
+                    else if (keysDown.right) { 
                         actor.vel = new Vector(5,0)
                     } 
                     else {
@@ -107,8 +115,6 @@ Game.prototype.animate = function () {
         
         this.actors = newActors
     }
-
-    keysDown = []
 }
 Game.prototype.begin = function () {
     this.actors.push(new Player(new Vector(200,50),new Vector(0,0)))
