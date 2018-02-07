@@ -1,31 +1,38 @@
 const GAME_WIDTH = 400
 const GAME_HEIGHT = 600
-
-const actor1 = {
-    paddle: {
-        pos: {x: 200, y: 50},
-        vel: {x: 0,y: 0},
-    }
-}
-const actor2 = {
-    paddle: {
-        pos: {x: 200, y: 550},
-        vel: {x: 0,y: 0},
-    }
-}
+const PADDLE1_INITIAL_POS = {x: 200, y: 550,}
+const PADDLE2_INITIAL_POS = {x: 200, y: 50,}
 
 function Game() {
 	this.width = GAME_WIDTH
 	this.height = GAME_HEIGHT
-    this.actors = [actor1, actor2]
-    this.active = false
+	this.actors = [new Player({initialPaddlePos: PADDLE1_INITIAL_POS, name: "player1"}), new Player({initialPaddlePos: PADDLE2_INITIAL_POS, name: "player2"})]
+	this.gameReady = false
 }
 Game.prototype.begin = function () {
-    this.active = true
+	this.actors.forEach(actor => {actor.setPaddle(new Paddle(actor.initialPaddlePos))})
+	this.gameReady = true;
 }
 Game.prototype.animate = function () {
-	if (this.active) {
+	if (gameReady) {
 	}
+}
+
+
+function Player({initialPaddlePos: initialPaddlePos, name: name}) {
+	this.initialPaddlePos = initialPaddlePos;
+	this.name = name;
+	this.paddle = null;
+	this.score = 0;
+}
+Player.prototype.setPaddle = function (paddle) {
+	this.paddle = paddle
+} 
+
+
+function Paddle(position) {
+	this.position = position
+	this.velocity = {xVelocity: 0, yVelocity: 0}
 }
 
 //////////////////////////////////////////////// PONG WRAPPER
@@ -79,31 +86,27 @@ function CanvasDisplay(parent, game) {
 }
 
 CanvasDisplay.prototype.drawFrame = function(step) {
-    this.animationTime += step;
-    let that = this
+	this.animationTime += step;
 
-    this.drawBackground().then(function() {
-        that.drawActors();
-    })
+	this.drawBackground();
+	this.drawActors();
 }
 
 CanvasDisplay.prototype.drawBackground = function () {
-    let cd = this
-    return new Promise(function (resolve,reject) {
-        cd.cx.fillStyle = "#000000";
-        cd.cx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        resolve()
-    })
+	this.cx.filleStyle = "#000000";
+	this.cx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 };
 
 CanvasDisplay.prototype.drawActors = function () {
-	this.game.actors.forEach(actor => {
-        const pos = actor.paddle.pos
-        console.log("x:"+pos.x+",y:"+pos.y)
+	this.game.actors.map(actor => {
 
-        this.cx.fillStyle = "#FF0000";
-        this.cx.fillRect(pos.x, pos.y, 50, 20);
-    });
+		if (!actor.paddle) {return}
+		paddlePos = actor.paddle.position
+		console.log(paddlePos)
+	
+		this.cx.fillStyle = "#FF0000";
+		this.cx.fillRect(paddlePos.x, paddlePos.y, 50, 20);
+	})
 };
 
 let animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
