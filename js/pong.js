@@ -1,7 +1,7 @@
-let LEVEL_WIDTH = 400;
-let LEVEL_HEIGHT = 600;
+const LEVEL_WIDTH = 400;
+const LEVEL_HEIGHT = 600;
 
-let PLAYER_START = {
+const PLAYER_START = {
 	x: 200,
 	y: 550
 };
