@@ -5,7 +5,7 @@ const BALL_RADIUS = 10
 const PADDLE_HEIGHT = 10
 const PADDLE_WIDTH = 80
 
-let keysDown = {right: false, left: false}
+let keysDown = {right: false, left: false, a: false, d: false}
 
 document.addEventListener('keydown', function(event) {
     if(event.keyCode == 37) {
@@ -14,6 +14,12 @@ document.addEventListener('keydown', function(event) {
     else if(event.keyCode == 39) {
         keysDown.right = true
     }
+    else if (event.keyCode == 65) {
+        keysDown.a = true
+    }
+    else if (event.keyCode == 68) {
+        keysDown.d = true
+    }
 });
 document.addEventListener('keyup', function(event) {
     if(event.keyCode == 37) {
@@ -21,6 +27,12 @@ document.addEventListener('keyup', function(event) {
     }
     else if(event.keyCode == 39) {
         keysDown.right = false
+    }
+    else if (event.keyCode == 65) {
+        keysDown.a = false
+    }
+    else if (event.keyCode == 68) {
+        keysDown.d = false
     }
 });
 
@@ -45,8 +57,9 @@ function Ball(initialPos, initialVel) {
 Ball.prototype.update = function() {
     this.pos.plus(this.vel)
 }
-function Player(initialPos, initialVel) {
+function Player(initialPos, initialVel, id) {
     this.height = PADDLE_HEIGHT
+    this.id = id
     this.pos= initialPos
     this.type = "player"
     this.vel= initialVel
@@ -63,7 +76,7 @@ function Game() {
     this.actors = []
     this.active = false
 }
-Game.prototype.animate = function () {
+Game.prototype.animate = function (step) {
 	if (this.active) {
         //UPDATE ACTORS
         //OLD ACTORS ACT AS PREVIOUS STATE
@@ -88,7 +101,7 @@ Game.prototype.animate = function () {
                         }
                         if (hasCollision(actor,actor2)) {
                             actor.vel.y *= -1
-                            actor.vel.x = 10*(actor.pos.x-actor2.pos.x)/actor2.width
+                            actor.vel.x = 3*((actor.pos.x-actor2.pos.x)/actor2.width)^2
                         }
                     })
                     if (actor.pos.x < 0 || actor.pos.x > this.width) {
@@ -97,18 +110,37 @@ Game.prototype.animate = function () {
                     break;
                 case "player":
                     actor.pos.plus(actor.vel)
-                    if (keysDown.left && keysDown.right) {
-                        actor.vel = new Vector(0,0)
+                    switch (actor.id) {
+                        case 1:
+                            if (keysDown.left && keysDown.right) {
+                                actor.vel = new Vector(0,0)
+                            }
+                            else if (keysDown.left) {
+                                actor.vel = new Vector(-5,0)
+                            } 
+                            else if (keysDown.right) { 
+                                actor.vel = new Vector(5,0)
+                            } 
+                            else {
+                                actor.vel = new Vector(0,0)
+                            }
+                            break;
+                        case 2:
+                            if (keysDown.a && keysDown.d) {
+                                actor.vel = new Vector(0,0)
+                            }
+                            else if (keysDown.a) {
+                                actor.vel = new Vector(-5,0)
+                            } 
+                            else if (keysDown.d) { 
+                                actor.vel = new Vector(5,0)
+                            } 
+                            else {
+                                actor.vel = new Vector(0,0)
+                            }
+                            break;
                     }
-                    else if (keysDown.left) {
-                        actor.vel = new Vector(-5,0)
-                    } 
-                    else if (keysDown.right) { 
-                        actor.vel = new Vector(5,0)
-                    } 
-                    else {
-                        actor.vel = new Vector(0,0)
-                    }
+                    
             }
             newActors.push(actor)
         })
@@ -117,9 +149,9 @@ Game.prototype.animate = function () {
     }
 }
 Game.prototype.begin = function () {
-    this.actors.push(new Player(new Vector(200,50),new Vector(0,0)))
-    this.actors.push(new Player(new Vector(200,550),new Vector(0,0)))
-    this.actors.push(new Ball(new Vector(160,300),new Vector(0,2)))
+    this.actors.push(new Player(new Vector(200,50),new Vector(0,0),1))
+    this.actors.push(new Player(new Vector(200,550),new Vector(0,0),2))
+    this.actors.push(new Ball(new Vector(160,300),new Vector(0,4)))
     this.active = true
 }
 
@@ -129,7 +161,7 @@ function runAnimation(frameFunc) {
 	function frame(time) {
 		let stop = false;
 		if (lastTime != null) {
-			let timeStep = Math.min(time - lastTime, 100) /1000;
+			let timeStep = Math.min(time - lastTime, 10) /1000;
 			stop = frameFunc(timeStep) === false;
 		}
 		lastTime = time;
