@@ -3,7 +3,7 @@ const GAME_HEIGHT = 600;
 
 const PLAYER_START = {
 	x: 200,
-	y: 550,
+	y: 550
 };
 
 function Vector(x, y) {
