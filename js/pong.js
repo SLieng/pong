@@ -1,200 +1,108 @@
+let LEVEL_WIDTH = 400;
+let LEVEL_HEIGHT = 600;
+
+let PLAYER_START = {
+	x: 200,
+	y: 550
+};
+
+function Vector(x, y) {
+	this.x = x; this.y = y;
+}
+
+function Game() {
+	this.width = LEVEL_WIDTH;
+	this.height = LEVEL_HEIGHT;
+
+	this.actors = [];
+
+	//Player
+	playerStart = new Vector(PLAYER_START.x, PLAYER_START.y);
+	this.actors.push(new Player(playerStart));
+
+}
+
+function Player(pos) {
+	this.pos = pos;
+	this.speed = new Vector(0,0);
+}
+
+//////////////////////////////////////////////// PONG WRAPPER
+function runAnimation(frameFunc) {
+	let lastTime = null;
+	function frame(time) {
+		let stop = false;
+		if (lastTime != null) {
+			let timeStep = Math.min(time - lastTime, 100) /1000;
+			stop = frameFunc(timeStep) === false;
+		}
+		lastTime = time;
+		if(!stop) 
+			requestAnimationFrame(frame);
+	}
+	requestAnimationFrame(frame);
+}
+
+function runGame(game) {
+	let display = new CanvasDisplay(document.body, game);
+	runAnimation(function(step) {
+		game.animate(step, arrows);
+		display.drawFrame(step);
+	});
+}
+
+function runPong() {
+	let game = new Game();	
+	runGame(game);
+}
+
+$(document).ready(function() {
+	console.log("START");
+	runPong();
+});
+
+//////////////////////////////////////////CANVAS
+
 let CANVAS_WIDTH = 400;
 let CANVAS_HEIGHT = 600;
+
+function CanvasDisplay(parent, game) {
+	this.canvas = document.createElement("canvas");
+	this.canvas.width = CANVAS_WIDTH;
+	this.canvas.height = CANVAS_HEIGHT;
+	parent.appendChild(this.canvas);
+	this.cx = this.canvas.getContext("2d");
+
+	this.game = game;
+	this.animationTime = 0;
+	this.drawFrame(0);
+}
+
+CanvasDisplay.prototype.drawFrame = function(step) {
+	this.animationTime += step;
+
+	this.drawBackground();
+	this.drawActors();
+
+	console.log("RUNNING");
+}
+
+CanvasDisplay.prototype.drawBackground = function() {
+	this.cx.filleStyle = "#000000";
+	this.cx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+};
+
+CanvasDisplay.prototype.drawActors = function() {
+	this.game.actors.forEach(function(actor) {
+		let x = actor.pos.x;
+		let y = actor.pos.y;
+
+		this.cx.fillStyle = "#FF0000";
+		this.cx.fillRect(x, y, 50, 20);
+
+	}, this);
+};
 
 let animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
 	window.setTimeout(callback, 1000 / 60)
 };
-
-let createCanvas = function(width, height) {
-	let canvas = document.createElement("canvas");
-	canvas.width = width;
-	canvas.height = height;
-
-	return canvas;
-}
-
-let canvas = createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-
-var context = canvas.getContext('2d');
-var player = new Player();
-var computer = new Computer();
-var ball = new Ball(200, 300);
-
-var keysDown = {};
-
-var render = function () {
-	    context.fillStyle = "#000000";
-	    context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-	    player.render();
-	    computer.render();
-	    ball.render();
-};
-
-var update = function () {
-	    player.update();
-	    computer.update(ball);
-	    ball.update(player.paddle, computer.paddle);
-};
-
-var log = function () {
-}
-
-var step = function () {
-	    update();
-	    render();
-			log();
-	    animate(step);
-};
-
-function Paddle(x, y, width, height) {
-	    this.x = x;
-	    this.y = y;
-	    this.width = width;
-	    this.height = height;
-	    this.x_speed = 0;
-	    this.y_speed = 0;
-}
-
-Paddle.prototype.render = function () {
-	    context.fillStyle = "#FFFFFF";
-	    context.fillRect(this.x, this.y, this.width, this.height);
-};
-
-Paddle.prototype.move = function (x, y) {
-	    this.x += x;
-	    this.y += y;
-	    this.x_speed = x;
-	    this.y_speed = y;
-	    if (this.x < 0) {
-				        this.x = 0;
-				        this.x_speed = 0;
-				    } else if (this.x + this.width > 400) {
-							        this.x = 400 - this.width;
-							        this.x_speed = 0;
-							    }
-};
-
-function Computer() {
-	    this.paddle = new Paddle(175, 10, 50, 10);
-}
-
-Computer.prototype.render = function () {
-	    this.paddle.render();
-};
-
-Computer.prototype.update = function (ball) {
-	    var x_pos = ball.x;
-	    var diff = -((this.paddle.x + (this.paddle.width / 2)) - x_pos);
-	    if (diff < 0 && diff < -4) {
-				        diff = -5;
-				    } else if (diff > 0 && diff > 4) {
-							        diff = 5;
-							    }
-	    this.paddle.move(diff, 0);
-	    if (this.paddle.x < 0) {
-				        this.paddle.x = 0;
-				    } else if (this.paddle.x + this.paddle.width > 400) {
-							        this.paddle.x = 400 - this.paddle.width;
-							    }
-};
-
-function Player() {
-	    this.paddle = new Paddle(175, 580, 50, 10);
-}
-
-Player.prototype.render = function () {
-	    this.paddle.render();
-};
-
-Player.prototype.update = function () {
-	    for (var key in keysDown) {
-				        var value = Number(key);
-				        if (value == 81) {
-									            this.paddle.move(-4, 0);
-									        } else if (value == 87) {
-														            this.paddle.move(4, 0);
-														        } else {
-																			            this.paddle.move(0, 0);
-																			        }
-				    }
-};
-
-function Ball(x, y) {
-	    this.x = x;
-	    this.y = y;
-	    this.x_speed = 0;
-	    this.y_speed = 6;
-}
-
-Ball.prototype.render = function () {
-	    context.beginPath();
-	    context.arc(this.x, this.y, 5, 2 * Math.PI, false);
-	    context.fillStyle = "#FF0000";
-	    context.fill();
-};
-
-Ball.prototype.update = function (paddle1, paddle2) {
-	    this.x += this.x_speed;
-	    this.y += this.y_speed;
-	    var top_x = this.x - 5;
-	    var top_y = this.y - 5;
-	    var bottom_x = this.x + 5;
-	    var bottom_y = this.y + 5;
-
-	    if (this.x - 5 < 0) {
-				        this.x = 5;
-				        this.x_speed = -this.x_speed;
-				    } else if (this.x + 5 > 400) {
-							        this.x = 395;
-							        this.x_speed = -this.x_speed;
-							    }
-
-	    if (this.y < 0 || this.y > 600) {
-				        this.x_speed = 0;
-				        this.y_speed = 6;
-				        this.x = 200;
-				        this.y = 300;
-				    }
-
-	    if (top_y > 300) {
-				        if (top_y < (paddle1.y + paddle1.height) && bottom_y > paddle1.y && top_x < (paddle1.x + paddle1.width) && bottom_x > paddle1.x) {
-									            this.y_speed = -6;
-									            this.x_speed += (paddle1.x_speed / 2);
-									            this.y += this.y_speed;
-									        }
-				    } else {
-							        if (top_y < (paddle2.y + paddle2.height) && bottom_y > paddle2.y && top_x < (paddle2.x + paddle2.width) && bottom_x > paddle2.x) {
-												            this.y_speed = 6;
-												            this.x_speed += (paddle2.x_speed / 2);
-												            this.y += this.y_speed;
-												        }
-							    }
-};
-
-document.body.appendChild(canvas);
-animate(step);
-
-window.addEventListener("keydown", function (event) {
-	    keysDown[event.keyCode] = true;
-});
-
-window.addEventListener("keyup", function (event) {
-	    delete keysDown[event.keyCode];
-});
-
-$( document ).ready(function() {
-	let cars = [
-			{ "make":"Porsche", "model":"911S" },
-			{ "make":"Mercedes-Benz", "model":"220SE" },
-			{ "make":"Jaguar","model": "Mark VII" }
-	];
-
-	$.ajax({
-		type: "POST",
-		contentType: "application/json; charset=utf-8",
-		url: "/receiver",
-		data: JSON.stringify(cars)
-	}).done(function(data) {
-		console.log("done");
-	});
-});
