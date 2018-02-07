@@ -1,33 +1,28 @@
 const GAME_WIDTH = 400
 const GAME_HEIGHT = 600
 
-const actor1 = {
-    paddle: {
-        pos: {x: 200, y: 50},
-        vel: {x: 0,y: 0},
-    }
-}
-const actor2 = {
-    paddle: {
-        pos: {x: 200, y: 550},
-        vel: {x: 0,y: 0},
-    }
-}
+function Actor(type,initialPos,initialVel) {
+    this.type= type
+    this.pos= initialPos
+    this.vel= initialVel
+} 
 
 function Game() {
 	this.width = GAME_WIDTH
 	this.height = GAME_HEIGHT
-    this.actors = [actor1, actor2]
+    this.actors = []
     this.active = false
-}
-Game.prototype.begin = function () {
-    this.active = true
 }
 Game.prototype.animate = function () {
 	if (this.active) {
 	}
 }
-
+Game.prototype.begin = function () {
+    this.actors.push(new Actor("player",{x:200, y:50},{x: 0,y: 0}))
+    this.actors.push(new Actor("player",{x:200, y:550},{x: 0,y: 0}))
+    this.actors.push(new Actor("ball",{x:200, y:300},{x: 0,y: 1}))
+    this.active = true
+}
 //////////////////////////////////////////////// PONG WRAPPER
 function runAnimation(frameFunc) {
 	let lastTime = null;
@@ -80,29 +75,29 @@ function CanvasDisplay(parent, game) {
 
 CanvasDisplay.prototype.drawFrame = function(step) {
     this.animationTime += step;
-    let that = this
 
-    this.drawBackground().then(function() {
-        that.drawActors();
-    })
+    this.drawBackground()
+    this.drawActors();
 }
 
 CanvasDisplay.prototype.drawBackground = function () {
-    let cd = this
-    return new Promise(function (resolve,reject) {
-        cd.cx.fillStyle = "#000000";
-        cd.cx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        resolve()
-    })
+
+    this.cx.fillStyle = "#000000";
+    this.cx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 };
 
 CanvasDisplay.prototype.drawActors = function () {
 	this.game.actors.forEach(actor => {
-        const pos = actor.paddle.pos
-        console.log("x:"+pos.x+",y:"+pos.y)
+        const pos = actor.pos
 
-        this.cx.fillStyle = "#FF0000";
-        this.cx.fillRect(pos.x, pos.y, 50, 20);
+        switch(actor.type) {
+            case "player":
+                this.cx.fillStyle = "#FF0000";
+                this.cx.fillRect(pos.x, pos.y, 50, 20);
+            case "ball":
+                this.cx.fillStyle = "#FFFFFF";
+                this.cx.fillRect(pos.x, pos.y, 10, 10)
+        }
     });
 };
 
