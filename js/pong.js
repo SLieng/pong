@@ -1,6 +1,9 @@
 const GAME_WIDTH = 400
 const GAME_HEIGHT = 600
 
+const BALL_RADIUS = 10
+const PADDLE_HEIGHT = 10
+const PADDLE_WIDTH = 80
 
 //Vector
 function Vector(x,y) {
@@ -14,17 +17,21 @@ Vector.prototype.plus = function(otherVector) {
 
 //ACTORS
 function Ball(initialPos, initialVel) {
+    this.height = BALL_RADIUS
     this.pos= initialPos
     this.type= "ball"
     this.vel= initialVel
+    this.width = BALL_RADIUS
 }
 Ball.prototype.update = function() {
     this.pos.plus(this.vel)
 }
 function Player(initialPos, initialVel) {
+    this.height = PADDLE_HEIGHT
     this.pos= initialPos
     this.type = "player"
     this.vel= initialVel
+    this.width = PADDLE_WIDTH
 }
 Player.prototype.update = function() {
     this.pos.plus(this.vel)
@@ -39,9 +46,20 @@ function Game() {
 }
 Game.prototype.animate = function () {
 	if (this.active) {
+        //UPDATE ACTORS
+        //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
         let newActors = []
-        oldActors.forEach(actor => {
+
+        function hasCollision(actorA,actorB) {
+            let xDistance = Math.abs(actorA.pos.x-actorB.pos.x)
+            let yDistance = Math.abs(actorA.pos.y-actorB.pos.y)
+            let totalWidth = (actorA.width+actorB.width)/2
+            let totalHeight = (actorA.height+actorB.height)/2
+            return (xDistance<=totalWidth && yDistance<=totalHeight)
+        }
+
+        this.actors.forEach(actor => {
             switch(actor.type) {
                 case "ball":
                     actor.pos.plus(actor.vel)
@@ -49,10 +67,14 @@ Game.prototype.animate = function () {
                         if (actor === actor2) {
                             return
                         }
-                        if (Math.abs(actor2.pos.y-actor.pos.y) < 10) {
+                        if (hasCollision(actor,actor2)) {
                             actor.vel.y *= -1
+                            actor.vel.x = 10*(actor.pos.x-actor2.pos.x)/actor2.width
                         }
                     })
+                    if (actor.pos.x < 0 || actor.pos.x > this.width) {
+                        actor.vel.x *= -1
+                    }
                     break;
             }
             newActors.push(actor)
@@ -64,7 +86,7 @@ Game.prototype.animate = function () {
 Game.prototype.begin = function () {
     this.actors.push(new Player(new Vector(200,50),new Vector(0,0)))
     this.actors.push(new Player(new Vector(200,550),new Vector(0,0)))
-    this.actors.push(new Ball(new Vector(200,300),new Vector(0,2)))
+    this.actors.push(new Ball(new Vector(160,300),new Vector(0,2)))
     this.active = true
 }
 //////////////////////////////////////////////// PONG WRAPPER
@@ -133,15 +155,17 @@ CanvasDisplay.prototype.drawBackground = function () {
 CanvasDisplay.prototype.drawActors = function () {
 	this.game.actors.forEach(actor => {
         const pos = actor.pos
+        const height = actor.height
+        const width = actor.width
 
         switch(actor.type) {
             case "player":
                 this.cx.fillStyle = "#FF0000";
-                this.cx.fillRect(pos.x, pos.y, 50, 20);
+                this.cx.fillRect(pos.x - width/2, pos.y - height/2, width, height);
                 break;
             case "ball":
                 this.cx.fillStyle = "#FFFFFF";
-                this.cx.fillRect(pos.x, pos.y, 10, 10);
+                this.cx.fillRect(pos.x - width/2, pos.y - height/2, width, height);
         }
     });
 };
