@@ -1,9 +1,9 @@
-const LEVEL_WIDTH = 400;
-const LEVEL_HEIGHT = 600;
+const GAME_WIDTH = 400;
+const GAME_HEIGHT = 600;
 
 const PLAYER_START = {
 	x: 200,
-	y: 550
+	y: 550,
 };
 
 function Vector(x, y) {
@@ -11,8 +11,8 @@ function Vector(x, y) {
 }
 
 function Game() {
-	this.width = LEVEL_WIDTH;
-	this.height = LEVEL_HEIGHT;
+	this.width = GAME_WIDTH;
+	this.height = GAME_HEIGHT;
 
 	this.actors = [];
 
