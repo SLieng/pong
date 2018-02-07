@@ -1,11 +1,35 @@
 const GAME_WIDTH = 400
 const GAME_HEIGHT = 600
 
-function Actor(type,initialPos,initialVel) {
-    this.type= type
+
+//Vector
+function Vector(x,y) {
+    this.x = x
+    this.y = y
+}
+Vector.prototype.plus = function(otherVector) {
+    this.x += otherVector.x
+    this.y += otherVector.y
+}
+
+//ACTORS
+function Ball(initialPos, initialVel) {
     this.pos= initialPos
+    this.type= "ball"
     this.vel= initialVel
-} 
+}
+Ball.prototype.update = function() {
+    this.pos.plus(this.vel)
+}
+function Player(initialPos, initialVel) {
+    this.pos= initialPos
+    this.type = "player"
+    this.vel= initialVel
+}
+Player.prototype.update = function() {
+    this.pos.plus(this.vel)
+}
+
 
 function Game() {
 	this.width = GAME_WIDTH
@@ -15,12 +39,32 @@ function Game() {
 }
 Game.prototype.animate = function () {
 	if (this.active) {
+        let oldActors = [...this.actors]
+        let newActors = []
+        oldActors.forEach(actor => {
+            switch(actor.type) {
+                case "ball":
+                    actor.pos.plus(actor.vel)
+                    oldActors.forEach(actor2 => {
+                        if (actor === actor2) {
+                            return
+                        }
+                        if (Math.abs(actor2.pos.y-actor.pos.y) < 10) {
+                            actor.vel.y *= -1
+                        }
+                    })
+                    break;
+            }
+            newActors.push(actor)
+        })
+        console.log(newActors)
+        this.actors = newActors
 	}
 }
 Game.prototype.begin = function () {
-    this.actors.push(new Actor("player",{x:200, y:50},{x: 0,y: 0}))
-    this.actors.push(new Actor("player",{x:200, y:550},{x: 0,y: 0}))
-    this.actors.push(new Actor("ball",{x:200, y:300},{x: 0,y: 1}))
+    this.actors.push(new Player(new Vector(200,50),new Vector(0,0)))
+    this.actors.push(new Player(new Vector(200,550),new Vector(0,0)))
+    this.actors.push(new Ball(new Vector(200,300),new Vector(0,2)))
     this.active = true
 }
 //////////////////////////////////////////////// PONG WRAPPER
@@ -94,9 +138,10 @@ CanvasDisplay.prototype.drawActors = function () {
             case "player":
                 this.cx.fillStyle = "#FF0000";
                 this.cx.fillRect(pos.x, pos.y, 50, 20);
+                break;
             case "ball":
                 this.cx.fillStyle = "#FFFFFF";
-                this.cx.fillRect(pos.x, pos.y, 10, 10)
+                this.cx.fillRect(pos.x, pos.y, 10, 10);
         }
     });
 };
