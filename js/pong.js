@@ -88,6 +88,11 @@ Ball.prototype.respawn = function() {
 	this.pos = new Vector(200,250);
 }
 
+Ball.prototype.log = function(data) {
+	data.pos.x = this.pos.x;
+	data.pos.y = this.pos.y;
+}
+
 function Paddle(initialPos, initialVel, id) {
     this.id = id
     this.pos= initialPos
@@ -113,6 +118,10 @@ Paddle.prototype.cmdStop = function() {
 	this.vel = new Vector(0,0);
 }
 
+Paddle.prototype.log = function(data) {
+	data.pos.x = this.pos.x;
+	data.pos.y = this.pos.y;
+}
 
 function Game() {
 	this.width = GAME_WIDTH
@@ -167,9 +176,18 @@ Game.prototype.animate = function (step) {
             }
             newActors.push(actor)
         })
-        
+
+				this.log();
+				
         this.actors = newActors
     }
+}
+
+Game.prototype.log = function () {
+  let newFrameData = [];
+
+	this.actors.forEach(actor => {
+	actors.log(data);
 }
 Game.prototype.begin = function () {
     this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4)))
@@ -187,7 +205,7 @@ Game.prototype.readKeyboardInput = function () {
 		this.paddle1.cmdMoveRight();
 	} else {
 		this.paddle1.cmdStop();
-    }
+	}
     //PLAYER 2
     if (keysDown.left) {
 		this.paddle2.cmdMoveLeft();
