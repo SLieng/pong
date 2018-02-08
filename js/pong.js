@@ -65,16 +65,36 @@ Vector.prototype.plus = function(otherVector) {
 
 //ACTORS
 function Ball(initialPos, initialVel, id) {
-    this.id = id
     this.height = BALL_RADIUS
-    this.pos= initialPos
-    this.type= "ball"
-    this.vel= initialVel
     this.width = BALL_RADIUS
+    this.pos= initialPos
+    this.vel= initialVel
+    this.id = id
+    this.type= "ball"
 }
 
-Ball.prototype.update = function() {
+Ball.prototype.update = function(actors) {
     this.pos.plus(this.vel)
+    actors.forEach(actor => {
+        if (this === actor) {return}
+        if (this.hasCollisionWith(actor)) {
+            this.vel.y *= -1
+            this.vel.x = 10*((this.pos.x-actor.pos.x)/actor.width)
+        }
+    })
+    if (this.pos.x < 0 || this.pos.x > 400) {
+        this.vel.x *= -1
+    }
+    if(this.outsideBounds()) {
+        this.respawn();
+    }
+}
+Ball.prototype.hasCollisionWith = function(actor) {
+    let xDistance = Math.abs(this.pos.x-actor.pos.x)
+    let yDistance = Math.abs(this.pos.y-actor.pos.y)
+    let totalWidth = (this.width+actor.width)/2
+    let totalHeight = (this.height+actor.height)/2
+    return (xDistance<=totalWidth && yDistance<=totalHeight)
 }
 
 Ball.prototype.outsideBounds = function() {
@@ -96,12 +116,12 @@ Ball.prototype.log = function(data) {
 }
 
 function Paddle(initialPos, initialVel, id) {
-    this.id = id
-    this.pos= initialPos
-    this.type = "paddle"
-    this.vel= initialVel
     this.width = PADDLE_WIDTH
     this.height = PADDLE_HEIGHT
+    this.pos= initialPos
+    this.vel= initialVel
+    this.id = id
+    this.type = "paddle"
 }
 
 Paddle.prototype.update = function() {
@@ -129,8 +149,8 @@ Paddle.prototype.log = function(data) {
 function Game() {
 	this.width = GAME_WIDTH
     this.height = GAME_HEIGHT
-    this.paddle1 = new Paddle(new Vector(200,50),new Vector(0,0),1);
-    this.paddle2 = new Paddle(new Vector(200,550),new Vector(0,0),2);
+    this.paddle1 = new Paddle(new Vector(200,50),new Vector(0,0),"player1");
+    this.paddle2 = new Paddle(new Vector(200,550),new Vector(0,0),"player2");
     this.actors = [this.paddle1,this.paddle2]
     this.active = false
 }
@@ -142,7 +162,6 @@ Game.prototype.animate = function (step) {
         //UPDATE ACTORS
         //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
-        let newActors = []
 
         function hasCollision(actorA,actorB) {
             let xDistance = Math.abs(actorA.pos.x-actorB.pos.x)
@@ -153,36 +172,9 @@ Game.prototype.animate = function (step) {
         }
 
         this.actors.forEach(actor => {
-            switch(actor.type) {
-                case "ball":
-                    actor.pos.plus(actor.vel)
-                    oldActors.forEach(actor2 => {
-                        if (actor === actor2) {
-                            return
-                        }
-                        if (hasCollision(actor,actor2)) {
-                            actor.vel.y *= -1
-                            actor.vel.x = 3*((actor.pos.x-actor2.pos.x)/actor2.width)^2
-                        }
-                    })
-                    if (actor.pos.x < 0 || actor.pos.x > this.width) {
-                        actor.vel.x *= -1
-                    }
-
-										if(actor.outsideBounds()) {
-											actor.respawn();
-										}
-                    break;
-                case "paddle":
-                    actor.pos.plus(actor.vel)
-                    
-            }
-            newActors.push(actor)
+            actor.update(oldActors)
         })
-
-				this.log();
-				
-        this.actors = newActors
+        this.log();
     }
 }
 
@@ -193,16 +185,13 @@ Game.prototype.log = function () {
 		let obj = {};
 		actor.log(obj);
 		let key = actor.id;
-		console.log(key);
 		newFrameEntry[key] = obj;
 	});
 
 	console.log(newFrameEntry);
 }
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), 4))
-    this.spawnBall(new Ball(new Vector(200,200), new Vector(0,4), 5))
-    this.spawnBall(new Ball(new Vector(200,250), new Vector(0,4), 6))
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"))
     
     this.active = true
 }
