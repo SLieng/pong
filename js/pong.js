@@ -178,6 +178,7 @@ Game.prototype.animate = function (step) {
 						case "ball":	
 							if(actor.outsideBounds()) {
 								actor.respawn();
+								this.sendLog(this.frameData);
 								this.timePassed = -step;
 							}
 							break;
@@ -200,13 +201,26 @@ Game.prototype.log = function () {
 
 	newFrameEntry.timePassed = this.timePassed;
 
+	this.frameData.push(newFrameEntry);
 	console.log(newFrameEntry);
+}
+
+Game.prototype.sendLog = function(data) {
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: "/receiver",
+		data: JSON.stringify(data)
+	}).done(function(data) {
+		console.log("SUCCESS in sending log");
+	});
 }
 
 Game.prototype.begin = function () {
     this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"));
 
 		this.timePassed = 0;
+	  this.frameData = [];
     
     this.active = true;
 }
