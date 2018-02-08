@@ -75,7 +75,7 @@ function Ball(initialPos, initialVel, id) {
     this.type= "ball"
 }
 
-Ball.prototype.update = function(actors) {
+Ball.prototype.update = function(actors,step) {
     this.pos.plus(this.vel)
     actors.forEach(actor => {
         if (this === actor) {return}
@@ -127,7 +127,7 @@ function Paddle(initialPos, initialVel, id) {
     this.type = "paddle"
 }
 
-Paddle.prototype.update = function() {
+Paddle.prototype.update = function(actors,step) {
     this.pos.plus(this.vel)
 }
 
@@ -160,14 +160,14 @@ function Game() {
 }
 
 Game.prototype.animate = function (step) {
-	this.readKeyboardInput();
+    this.readKeyboardInput();
 	
 	if (this.active) {
         //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
 
         this.actors.forEach(actor => {
-            actor.update(oldActors)
+            actor.update(oldActors,step)
         })
         this.log();
     }
