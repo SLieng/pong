@@ -159,17 +159,8 @@ Game.prototype.animate = function (step) {
 	this.readKeyboardInput();
 	
 	if (this.active) {
-        //UPDATE ACTORS
         //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
-
-        function hasCollision(actorA,actorB) {
-            let xDistance = Math.abs(actorA.pos.x-actorB.pos.x)
-            let yDistance = Math.abs(actorA.pos.y-actorB.pos.y)
-            let totalWidth = (actorA.width+actorB.width)/2
-            let totalHeight = (actorA.height+actorB.height)/2
-            return (xDistance<=totalWidth && yDistance<=totalHeight)
-        }
 
         this.actors.forEach(actor => {
             actor.update(oldActors)
