@@ -8,48 +8,48 @@ const PADDLE_WIDTH = 80
 let keysDown = {right: false, left: false, a: false, d: false, q: false, w: false}
 
 document.addEventListener('keydown', function(event) {
-	switch(event.keyCode) {
-		case 37:
-        keysDown.left = true;
-			break;
-		case 39:
-        keysDown.right = true;
-			break;
-		case 65:
-        keysDown.a = true;
-			break;
-		case 68:
-        keysDown.d = true
-			break;
-		case 81:
-			keysDown.q = true;
-			break;
-		case 87:
-			keysDown.w = true;
-			break;
+  switch(event.keyCode) {
+	case 37:
+      keysDown.left = true;
+	  break;
+	case 39:
+      keysDown.right = true;
+	  break;
+	case 65:
+      keysDown.a = true;
+      break;
+	case 68:
+      keysDown.d = true
+	  break;
+	case 81:
+	  keysDown.q = true;
+	  break;
+	case 87:
+	  keysDown.w = true;
+	  break;
     }
 });
 document.addEventListener('keyup', function(event) {
-		switch(event.keyCode) {
-		case 37:
-        keysDown.left = false;
-			break;
-		case 39:
-        keysDown.right = false;
-			break;
-		case 65:
-        keysDown.a = false;
-			break;
-		case 68:
-        keysDown.d = false;
-			break;
-			case 81:
-				keysDown.q = false;
-				break;
-			case 87:
-				keysDown.w = false;
-				break;
-		}
+  switch(event.keyCode) {
+    case 37:
+      keysDown.left = false;
+      break;
+    case 39:
+      keysDown.right = false;
+      break;
+    case 65:
+      keysDown.a = false;
+      break;
+    case 68:
+      keysDown.d = false;
+      break;
+    case 81:
+      keysDown.q = false;
+      break;
+    case 87:
+      keysDown.w = false;
+      break;
+    }
 });
 
 //Vector
@@ -85,7 +85,7 @@ Ball.prototype.outsideBounds = function() {
 }
 
 Ball.prototype.respawn = function() {
-	this.pos = new Vector(300,250);
+	this.pos = new Vector(200,250);
 }
 
 function Paddle(initialPos, initialVel, id) {
@@ -116,8 +116,10 @@ Paddle.prototype.cmdStop = function() {
 
 function Game() {
 	this.width = GAME_WIDTH
-	this.height = GAME_HEIGHT
-    this.actors = []
+    this.height = GAME_HEIGHT
+    this.paddle1 = new Paddle(new Vector(200,50),new Vector(0,0),1);
+    this.paddle2 = new Paddle(new Vector(200,550),new Vector(0,0),2);
+    this.actors = [this.paddle1,this.paddle2]
     this.active = false
 }
 
@@ -129,7 +131,7 @@ Game.prototype.animate = function (step) {
         //OLD ACTORS ACT AS PREVIOUS STATE
         let oldActors = [...this.actors]
         let newActors = []
-        console.log(keysDown)
+
         function hasCollision(actorA,actorB) {
             let xDistance = Math.abs(actorA.pos.x-actorB.pos.x)
             let yDistance = Math.abs(actorA.pos.y-actorB.pos.y)
@@ -170,23 +172,35 @@ Game.prototype.animate = function (step) {
     }
 }
 Game.prototype.begin = function () {
-		this.player = new Paddle(new Vector(200,50),new Vector(0,0),1);
-    this.actors.push(this.player);
-    this.actors.push(new Paddle(new Vector(200,550),new Vector(0,0),2))
-    this.actors.push(new Ball(new Vector(160,300),new Vector(0,4)))
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4)))
+    this.spawnBall(new Ball(new Vector(200,200), new Vector(0,4)))
+    this.spawnBall(new Ball(new Vector(200,250), new Vector(0,4)))
+    
     this.active = true
 }
 
 Game.prototype.readKeyboardInput = function () {
+    //PLAYER 1
 	if (keysDown.a || keysDown.q) {
-		this.player.cmdMoveLeft();
+		this.paddle1.cmdMoveLeft();
 	} else if (keysDown.d || keysDown.w) {
-		this.player.cmdMoveRight();
+		this.paddle1.cmdMoveRight();
 	} else {
-		this.player.cmdStop();
+		this.paddle1.cmdStop();
+    }
+    //PLAYER 2
+    if (keysDown.left) {
+		this.paddle2.cmdMoveLeft();
+	} else if (keysDown.right) {
+		this.paddle2.cmdMoveRight();
+	} else {
+		this.paddle2.cmdStop();
 	}
 }
 
+Game.prototype.spawnBall = function(ball) {
+    this.actors.push(ball);
+}
 //////////////////////////////////////////////// PONG WRAPPER
 function runAnimation(frameFunc) {
 	let lastTime = null;
