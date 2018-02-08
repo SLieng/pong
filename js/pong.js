@@ -87,9 +87,6 @@ Ball.prototype.update = function(actors,step) {
     if (this.pos.x < 0 || this.pos.x > 400) {
         this.vel.x *= -1
     }
-    if(this.outsideBounds()) {
-        this.respawn();
-    }
 }
 Ball.prototype.hasCollisionWith = function(actor) {
     let xDistance = Math.abs(this.pos.x-actor.pos.x)
@@ -125,6 +122,7 @@ function Paddle(initialPos, initialVel, id) {
     this.vel= initialVel
     this.id = id
     this.type = "paddle"
+	  this.state = "stop"
 }
 
 Paddle.prototype.update = function(actors,step) {
@@ -133,20 +131,24 @@ Paddle.prototype.update = function(actors,step) {
 
 Paddle.prototype.cmdMoveLeft = function() {
 	this.vel = new Vector(-5,0);
+	this.state = "left";
 }
 
 Paddle.prototype.cmdMoveRight = function() {
 	this.vel = new Vector(5,0);
+	this.state = "right";
 }
 
 Paddle.prototype.cmdStop = function() {
 	this.vel = new Vector(0,0);
+	this.state = "stop";
 }
 
 Paddle.prototype.log = function(data) {
 	data.pos = { x: null, y: null};
 	data.pos.x = this.pos.x;
 	data.pos.y = this.pos.y;
+	data.state = this.state;
 }
 //=================================================================GAME
 //=================================================================
@@ -169,6 +171,19 @@ Game.prototype.animate = function (step) {
         this.actors.forEach(actor => {
             actor.update(oldActors,step)
         })
+
+				/// TEMP
+				this.actors.forEach(actor => {
+					switch(actor.type) {
+						case "ball":	
+							if(actor.outsideBounds()) {
+								actor.respawn();
+								this.timePassed = -step;
+							}
+							break;
+					}
+			});
+				this.timePassed += step;
         this.log();
     }
 }
@@ -177,18 +192,23 @@ Game.prototype.log = function () {
   let newFrameEntry = {};
 
 	this.actors.forEach((actor) => {
-		let obj = {};
-		actor.log(obj);
+		let data = {};
+		actor.log(data);
 		let key = actor.id;
-		newFrameEntry[key] = obj;
+		newFrameEntry[key] = data;
 	});
+
+	newFrameEntry.timePassed = this.timePassed;
 
 	console.log(newFrameEntry);
 }
+
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"))
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"));
+
+		this.timePassed = 0;
     
-    this.active = true
+    this.active = true;
 }
 
 Game.prototype.readKeyboardInput = function () {
