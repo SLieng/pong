@@ -129,6 +129,20 @@ Paddle.prototype.update = function(actors,step) {
     this.pos.plus(this.vel)
 }
 
+Paddle.prototype.receiveCmd = function(command) {
+	switch(command) {
+			case "left":
+			this.cmdMoveLeft();
+			break;
+		case "right":
+			this.cmdMoveRight();
+			break;
+		case "stop":
+			this.cmdStop();
+			break;
+	}
+}
+
 Paddle.prototype.cmdMoveLeft = function() {
 	this.vel = new Vector(-5,0);
 	this.state = "left";
@@ -163,6 +177,7 @@ function Game() {
 
 Game.prototype.animate = function (step) {
     this.readKeyboardInput();
+		this.readAIInput();
 	
 	if (this.active) {
         //OLD ACTORS ACT AS PREVIOUS STATE
@@ -202,10 +217,11 @@ Game.prototype.log = function () {
 	newFrameEntry.timePassed = this.timePassed;
 
 	this.frameData.push(newFrameEntry);
-	console.log(newFrameEntry);
+	//console.log(newFrameEntry);
 }
 
 Game.prototype.sendLog = function(data) {
+	let game = this;
 	$.ajax({
 		type: "POST",
 		contentType: "application/json; charset=utf-8",
@@ -213,17 +229,38 @@ Game.prototype.sendLog = function(data) {
 		data: JSON.stringify(data)
 	}).done(function(data) {
 		console.log("SUCCESS in sending log");
+		game.getAI();
+	});
+}
+
+Game.prototype.getAI = function () {
+	let game = this;
+	$.ajax({
+		type: "GET",
+		contentType: "application/json; charset=utf-8",
+		url: "/transmit"
+	}).done(function(data) {
+		game.ai = JSON.parse(data);
+		console.log(data);
+		console.log("SUCCESS in getting AI");
 	});
 }
 
 Game.prototype.begin = function () {
     this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"));
 
+    this.ai = [{"timePassed": 2, "cmd": "left"}]
 		this.timePassed = 0;
 	  this.frameData = [];
     
     this.active = true;
 }
+
+Game.prototype.spawnBall = function(ball) {
+    this.actors.push(ball);
+}
+
+////////////////////////////////////// Input
 
 Game.prototype.readKeyboardInput = function () {
     //PLAYER 1
@@ -240,13 +277,32 @@ Game.prototype.readKeyboardInput = function () {
 	} else if (keysDown.right) {
 		this.paddle2.cmdMoveRight();
 	} else {
-		this.paddle2.cmdStop();
+		//this.paddle2.cmdStop();
 	}
 }
 
-Game.prototype.spawnBall = function(ball) {
-    this.actors.push(ball);
+Game.prototype.readAIInput = function () {
+	let numCommands = this.ai.length;
+	let timePassed = this.timePassed;
+	let receivedCmd = false;
+
+	for(let i=1; i<numCommands; i++) {
+		if(this.ai[i].timePassed > timePassed) {
+			this.paddle2.receiveCmd(this.ai[i-1].cmd);
+			receivedCmd = true;
+			break;
+		}
+	}
+	
+	if(!receivedCmd) {
+		console.log("DKLSFJFDLK");
+		console.log(this.ai[numCommands-1].cmd);
+			this.paddle2.receiveCmd(this.ai[numCommands-1].cmd);
+	}
+
+	console.log(this.paddle2.pos.x);
 }
+
 //////////////////////////////////////////////// PONG WRAPPER
 function runAnimation(frameFunc) {
 	let lastTime = null;
