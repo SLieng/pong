@@ -194,6 +194,7 @@ Game.prototype.animate = function (step) {
 							if(actor.outsideBounds()) {
 								actor.respawn();
 								this.sendLog(this.frameData);
+								this.frameData = [];
 								this.timePassed = -step;
 							}
 							break;
@@ -241,7 +242,7 @@ Game.prototype.getAI = function () {
 		url: "/transmit"
 	}).done(function(data) {
 		game.ai = JSON.parse(data);
-		console.log(data);
+		//console.log(data);
 		console.log("SUCCESS in getting AI");
 	});
 }
