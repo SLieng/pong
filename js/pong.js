@@ -225,14 +225,6 @@ Game.prototype.readKeyboardInput = function () {
 	} else {
 		this.paddle1.cmdStop();
 	}
-    //PLAYER 2
-    //if (keysDown.left) {
-		//this.paddle2.cmdMoveLeft();
-	//} else if (keysDown.right) {
-		//this.paddle2.cmdMoveRight();
-	//} else {
-		//this.paddle2.cmdStop();
-	//}
 }
 
 Game.prototype.readAIInput = function () {
