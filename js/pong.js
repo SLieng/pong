@@ -5,53 +5,6 @@ const BALL_RADIUS = 10
 const PADDLE_HEIGHT = 10
 const PADDLE_WIDTH = 80
 
-let keysDown = {right: false, left: false, a: false, d: false, q: false, w: false}
-
-document.addEventListener('keydown', function(event) {
-  switch(event.keyCode) {
-	case 37:
-      keysDown.left = true;
-	  break;
-	case 39:
-      keysDown.right = true;
-	  break;
-	case 65:
-      keysDown.a = true;
-      break;
-	case 68:
-      keysDown.d = true
-	  break;
-	case 81:
-	  keysDown.q = true;
-	  break;
-	case 87:
-	  keysDown.w = true;
-	  break;
-    }
-});
-document.addEventListener('keyup', function(event) {
-  switch(event.keyCode) {
-    case 37:
-      keysDown.left = false;
-      break;
-    case 39:
-      keysDown.right = false;
-      break;
-    case 65:
-      keysDown.a = false;
-      break;
-    case 68:
-      keysDown.d = false;
-      break;
-    case 81:
-      keysDown.q = false;
-      break;
-    case 87:
-      keysDown.w = false;
-      break;
-    }
-});
-
 //=============================================================Vector
 //=============================================================
 function Vector(x,y) {
@@ -265,21 +218,21 @@ Game.prototype.spawnBall = function(ball) {
 
 Game.prototype.readKeyboardInput = function () {
     //PLAYER 1
-	if (keysDown.a || keysDown.q) {
+	if (keysDown.player1Left) {
 		this.paddle1.cmdMoveLeft();
-	} else if (keysDown.d || keysDown.w) {
+	} else if (keysDown.player1Right) {
 		this.paddle1.cmdMoveRight();
 	} else {
 		this.paddle1.cmdStop();
 	}
     //PLAYER 2
-    if (keysDown.left) {
-		this.paddle2.cmdMoveLeft();
-	} else if (keysDown.right) {
-		this.paddle2.cmdMoveRight();
-	} else {
+    //if (keysDown.left) {
+		//this.paddle2.cmdMoveLeft();
+	//} else if (keysDown.right) {
+		//this.paddle2.cmdMoveRight();
+	//} else {
 		//this.paddle2.cmdStop();
-	}
+	//}
 }
 
 Game.prototype.readAIInput = function () {
