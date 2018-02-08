@@ -64,7 +64,8 @@ Vector.prototype.plus = function(otherVector) {
 }
 
 //ACTORS
-function Ball(initialPos, initialVel) {
+function Ball(initialPos, initialVel, id) {
+    this.id = id
     this.height = BALL_RADIUS
     this.pos= initialPos
     this.type= "ball"
@@ -89,6 +90,7 @@ Ball.prototype.respawn = function() {
 }
 
 Ball.prototype.log = function(data) {
+	data.pos = { x: null, y: null};
 	data.pos.x = this.pos.x;
 	data.pos.y = this.pos.y;
 }
@@ -119,6 +121,7 @@ Paddle.prototype.cmdStop = function() {
 }
 
 Paddle.prototype.log = function(data) {
+	data.pos = { x: null, y: null};
 	data.pos.x = this.pos.x;
 	data.pos.y = this.pos.y;
 }
@@ -184,15 +187,22 @@ Game.prototype.animate = function (step) {
 }
 
 Game.prototype.log = function () {
-  let newFrameData = [];
+  let newFrameEntry = {};
 
-	this.actors.forEach(actor => {
-	actors.log(data);
+	this.actors.forEach((actor) => {
+		let obj = {};
+		actor.log(obj);
+		let key = actor.id;
+		console.log(key);
+		newFrameEntry[key] = obj;
+	});
+
+	console.log(newFrameEntry);
 }
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4)))
-    this.spawnBall(new Ball(new Vector(200,200), new Vector(0,4)))
-    this.spawnBall(new Ball(new Vector(200,250), new Vector(0,4)))
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), 4))
+    this.spawnBall(new Ball(new Vector(200,200), new Vector(0,4), 5))
+    this.spawnBall(new Ball(new Vector(200,250), new Vector(0,4), 6))
     
     this.active = true
 }
