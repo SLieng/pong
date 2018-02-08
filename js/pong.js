@@ -52,7 +52,8 @@ document.addEventListener('keyup', function(event) {
     }
 });
 
-//Vector
+//=============================================================Vector
+//=============================================================
 function Vector(x,y) {
     this.x = x
     this.y = y
@@ -63,7 +64,8 @@ Vector.prototype.plus = function(otherVector) {
     this.y += otherVector.y
 }
 
-//ACTORS
+//==============================================================BALL
+//===============================================================
 function Ball(initialPos, initialVel, id) {
     this.height = BALL_RADIUS
     this.width = BALL_RADIUS
@@ -114,7 +116,8 @@ Ball.prototype.log = function(data) {
 	data.pos.x = this.pos.x;
 	data.pos.y = this.pos.y;
 }
-
+//===========================================================PADDLE
+//===========================================================
 function Paddle(initialPos, initialVel, id) {
     this.width = PADDLE_WIDTH
     this.height = PADDLE_HEIGHT
@@ -145,7 +148,8 @@ Paddle.prototype.log = function(data) {
 	data.pos.x = this.pos.x;
 	data.pos.y = this.pos.y;
 }
-
+//=================================================================GAME
+//=================================================================
 function Game() {
 	this.width = GAME_WIDTH
     this.height = GAME_HEIGHT
