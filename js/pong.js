@@ -17,9 +17,9 @@ Vector.prototype.plus = function(otherVector) {
     this.y += otherVector.y
 }
 
-Vector.prototype.multiply = function(otherVector) {
-    this.x *= otherVector.x
-    this.y *= otherVector.y
+Vector.prototype.multiply = function(scalar) {
+	 scalar = 1;
+	 return new Vector(this.x * scalar, this.y * scalar);
 }
 
 Vector.prototype.getSum = function(otherVector) {
@@ -38,6 +38,7 @@ Vector.prototype.getDirections = function() {
 	} else if(this.y > 0) {
 		directions.push("down");
 	}
+	return directions;
 }
 
 //==============================================================WALL
@@ -56,6 +57,10 @@ function Field() {
 Field.prototype.update = function(actors, step) {
 }
 
+Field.prototype.log = function(data) {
+	return data;
+}
+
 //==============================================================BALL
 //===============================================================
 function Ball(initialPos, initialVel, id) {
@@ -72,6 +77,7 @@ Ball.prototype.update = function(actors,step) {
 	  while (stepsLeft > 0) {
 			directions = this.vel.getDirections();
 
+
 			let stepsTaken = stepsLeft;
 			let newVel = new Vector(this.vel.x, this.vel.y);
 			let newPos = this.pos.getSum(this.vel.multiply(stepsLeft));
@@ -80,11 +86,11 @@ Ball.prototype.update = function(actors,step) {
 				if(actors[i] === this) continue;
 				if(actors[i].walls) {
 					for(let j=0; j<actors[i].walls.length; j++) {
-						if(actors[i].walls[j].type in directions) {
+						if(directions.includes(actors[i].walls[j].type)) {
 							let corners = [new Vector(-BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(-BALL_RADIUS/2, BALL_RADIUS/2), new Vector(BALL_RADIUS/2, BALL_RADIUS/2)];
 							for(let k=0; k<corners.length; k++) {
 								let oldCorner = this.pos.getSum(corners[k]);
-								let newCorner = this.newPos.getSum(corners[k]);
+								let newCorner = newPos.getSum(corners[k]);
 
 								// y = mx + c
 								let m = (newCorner.y - oldCorner.y)/(newCorner.x - oldCorner.x);
@@ -120,6 +126,7 @@ Ball.prototype.update = function(actors,step) {
 			this.pos.plus(this.vel.multiply(stepsTaken));
 			this.vel = newVel;
 			stepsLeft -= stepsTaken;
+		}
 		
     //this.pos.plus(this.vel)
     //actors.forEach(actor => {
@@ -296,7 +303,7 @@ Game.prototype.getAI = function () {
 }
 
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(0,4), "ball"));
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(-4,2), "ball"));
 
     this.ai = [{"timePassed": 2, "cmd": "left"}]
 		this.timePassed = 0;
@@ -307,4 +314,36 @@ Game.prototype.begin = function () {
 
 Game.prototype.spawnBall = function(ball) {
     this.actors.push(ball);
+}
+
+Game.prototype.readKeyboardInput = function () {
+    //PLAYER 1
+	if (keysDown.player1Left) {
+		this.paddle1.cmdMoveLeft();
+	} else if (keysDown.player1Right) {
+		this.paddle1.cmdMoveRight();
+	} else {
+		this.paddle1.cmdStop();
+	}
+}
+
+Game.prototype.readAIInput = function () {
+	let numCommands = this.ai.length;
+	let timePassed = this.timePassed;
+	let receivedCmd = false;
+
+	for(let i=1; i<numCommands; i++) {
+		if(this.ai[i].timePassed > timePassed) {
+			this.paddle2.receiveCmd(this.ai[i-1].cmd);
+			receivedCmd = true;
+			break;
+		}
+	}
+	
+	if(!receivedCmd) {
+		//console.log(this.ai[numCommands-1].cmd);
+			this.paddle2.receiveCmd(this.ai[numCommands-1].cmd);
+	}
+
+	//console.log(this.paddle2.pos.x);
 }
