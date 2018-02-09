@@ -17,6 +17,40 @@ Vector.prototype.plus = function(otherVector) {
     this.y += otherVector.y
 }
 
+Vector.prototype.getSum = function(otherVector) {
+		return new Vector(this.x + otherVector.x, this.y + otherVector.y)
+}
+
+Vector.prototype.getDirections = function() {
+	let directions = [];
+	if(this.x < 0) {
+		directions.push("left");
+	} else if(this.x > 0) {
+		directions.push("right");
+	}
+	if(this.y < 0) {
+		directions.push("up");
+	} else if(this.y > 0) {
+		directions.push("down");
+	}
+}
+
+//==============================================================WALL
+//===============================================================
+function Wall(type, startVec, endVec) { //(, left, right) or (, up, down) RELATIVE POSITION
+	this.type = type;
+	this.startVec = startVec;
+	this.endVec = endVec;
+}
+
+function Field() {
+	this.pos = new Vector(0, 0);
+	this.walls = [new Wall("left", new Vector(0, 0), new Vector(0, 600)), new Wall("right", new Vector(400, 0), new Vector(400, 600))];
+}
+
+Field.prototype.update = function(actors, step) {
+}
+
 //==============================================================BALL
 //===============================================================
 function Ball(initialPos, initialVel, id) {
@@ -29,18 +63,28 @@ function Ball(initialPos, initialVel, id) {
 }
 
 Ball.prototype.update = function(actors,step) {
-    this.pos.plus(this.vel)
-    actors.forEach(actor => {
-        if (this === actor) {return}
-        if (this.hasCollisionWith(actor)) {
-            this.vel.y *= -1
-            this.vel.x = 10*((this.pos.x-actor.pos.x)/actor.width)
-        }
-    })
-    if (this.pos.x < 0 || this.pos.x > 400) {
-        this.vel.x *= -1
-    }
+		let stepsLeft = step;
+	  while (true) {
+			directions = this.vel.getDirections();
+
+			let expectedPos = this.pos.getSum(this.vel*stepsLeft);
+
+
+		}
+		
+    //this.pos.plus(this.vel)
+    //actors.forEach(actor => {
+        //if (this === actor) {return}
+        //if (this.hasCollisionWith(actor)) {
+            //this.vel.y *= -1
+            //this.vel.x = 10*((this.pos.x-actor.pos.x)/actor.width)
+        //}
+    //})
+    //if (this.pos.x < 0 || this.pos.x > 400) {
+        //this.vel.x *= -1
+    //}
 }
+
 Ball.prototype.hasCollisionWith = function(actor) {
     let xDistance = Math.abs(this.pos.x-actor.pos.x)
     let yDistance = Math.abs(this.pos.y-actor.pos.y)
@@ -58,7 +102,7 @@ Ball.prototype.outsideBounds = function() {
 }
 
 Ball.prototype.respawn = function() {
-	this.pos = new Vector(200,250);
+	this.pos = new Vector(200, 300);
 }
 
 Ball.prototype.log = function(data) {
@@ -126,6 +170,8 @@ function Game() {
     this.paddle2 = new Paddle(new Vector(200,550),new Vector(0,0),"player2");
     this.actors = [this.paddle1,this.paddle2]
     this.active = false
+
+		this.actors.push(new Field());
 }
 
 Game.prototype.animate = function (step) {
@@ -137,7 +183,7 @@ Game.prototype.animate = function (step) {
         let oldActors = [...this.actors]
 
         this.actors.forEach(actor => {
-            actor.update(oldActors,step)
+            actor.update(this.actors, step)
         })
 
 				/// TEMP
