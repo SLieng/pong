@@ -51,6 +51,10 @@ function Field() {
 Field.prototype.update = function(actors, step) {
 }
 
+Field.prototype.ifCollideWall() = function(ball) {
+
+}
+
 //==============================================================BALL
 //===============================================================
 function Ball(initialPos, initialVel, id) {
@@ -67,7 +71,24 @@ Ball.prototype.update = function(actors,step) {
 	  while (true) {
 			directions = this.vel.getDirections();
 
-			let expectedPos = this.pos.getSum(this.vel*stepsLeft);
+			let stepsTaken = stepsLeft;
+			let newVel = this.vel
+			let newPos = this.pos.getSum(this.vel*stepsLeft);
+
+			for(let i=0; i<actors.length; i++) {
+				if(actors[i] === this) continue;
+				if(actors[i].walls) {
+					actors[i].ifCollideWall(this);
+				}
+
+				this.checkCollideWalls(actors[i]);
+			}
+
+
+
+			actors.forEach(actor => {
+				if(this === actor) {return}
+				if(
 
 
 		}
