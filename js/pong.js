@@ -17,6 +17,11 @@ Vector.prototype.plus = function(otherVector) {
     this.y += otherVector.y
 }
 
+Vector.prototype.multiply = function(otherVector) {
+    this.x *= otherVector.x
+    this.y *= otherVector.y
+}
+
 Vector.prototype.getSum = function(otherVector) {
 		return new Vector(this.x + otherVector.x, this.y + otherVector.y)
 }
@@ -51,10 +56,6 @@ function Field() {
 Field.prototype.update = function(actors, step) {
 }
 
-Field.prototype.ifCollideWall() = function(ball) {
-
-}
-
 //==============================================================BALL
 //===============================================================
 function Ball(initialPos, initialVel, id) {
@@ -68,30 +69,57 @@ function Ball(initialPos, initialVel, id) {
 
 Ball.prototype.update = function(actors,step) {
 		let stepsLeft = step;
-	  while (true) {
+	  while (stepsLeft > 0) {
 			directions = this.vel.getDirections();
 
 			let stepsTaken = stepsLeft;
-			let newVel = this.vel
-			let newPos = this.pos.getSum(this.vel*stepsLeft);
+			let newVel = new Vector(this.vel.x, this.vel.y);
+			let newPos = this.pos.getSum(this.vel.multiply(stepsLeft));
 
 			for(let i=0; i<actors.length; i++) {
 				if(actors[i] === this) continue;
 				if(actors[i].walls) {
-					actors[i].ifCollideWall(this);
+					for(let j=0; j<actors[i].walls.length; j++) {
+						if(actors[i].walls[j].type in directions) {
+							let corners = [new Vector(-BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(-BALL_RADIUS/2, BALL_RADIUS/2), new Vector(BALL_RADIUS/2, BALL_RADIUS/2)];
+							for(let k=0; k<corners.length; k++) {
+								let oldCorner = this.pos.getSum(corners[k]);
+								let newCorner = this.newPos.getSum(corners[k]);
+
+								// y = mx + c
+								let m = (newCorner.y - oldCorner.y)/(newCorner.x - oldCorner.x);
+								let c = newCorner.y - m*newCorner.x;
+
+								switch(actors[i].walls[j].type) {
+									case "left":
+									case "right":
+										let xValue = actors[i].walls[j].startVec.x;
+										let y = m*xValue + c;
+										if((actors[i].walls[j].startVec.y <= y) || (y <= actors[i].walls[j].endVec.y)) {
+											let ratio = (y - oldCorner.y)/(newCorner.y - oldCorner.y);	
+											let newTimeTaken = ratio*stepsTaken;
+											if(newTimeTaken < stepsTaken) {
+												stepsTaken = newTimeTaken;
+												newVel.x = -this.vel.x;
+												newVel.y = this.vel.y;
+											}
+										}
+										break;
+									case "up":
+									case "down":
+										let yValue = actors[i].walls[j].startVec.y;
+										break;
+								}
+
+							}
+						}
+					}
 				}
-
-				this.checkCollideWalls(actors[i]);
-			}
-
-
-
-			actors.forEach(actor => {
-				if(this === actor) {return}
-				if(
-
-
 		}
+
+			this.pos.plus(this.vel.multiply(stepsTaken));
+			this.vel = newVel;
+			stepsLeft -= stepsTaken;
 		
     //this.pos.plus(this.vel)
     //actors.forEach(actor => {
