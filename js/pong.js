@@ -18,7 +18,6 @@ Vector.prototype.plus = function(otherVector) {
 }
 
 Vector.prototype.multiply = function(scalar) {
-	 scalar = 1;
 	 return new Vector(this.x * scalar, this.y * scalar);
 }
 
@@ -80,7 +79,7 @@ Ball.prototype.update = function(actors,step) {
 
 			let stepsTaken = stepsLeft;
 			let newVel = new Vector(this.vel.x, this.vel.y);
-			let newPos = this.pos.getSum(this.vel.multiply(stepsLeft));
+			let newPos = this.pos.getSum(this.vel.multiply(stepsLeft*100));
 
 			for(let i=0; i<actors.length; i++) {
 				if(actors[i] === this) continue;
@@ -96,24 +95,46 @@ Ball.prototype.update = function(actors,step) {
 								let m = (newCorner.y - oldCorner.y)/(newCorner.x - oldCorner.x);
 								let c = newCorner.y - m*newCorner.x;
 
+								let absStartVec = actors[i].walls[j].startVec.getSum(actors[i].pos);
+								let absEndVec = actors[i].walls[j].endVec.getSum(actors[i].pos);
+
 								switch(actors[i].walls[j].type) {
 									case "left":
 									case "right":
-										let xValue = actors[i].walls[j].startVec.x;
+										let xValue = absStartVec.x;
 										let y = m*xValue + c;
-										if((actors[i].walls[j].startVec.y <= y) || (y <= actors[i].walls[j].endVec.y)) {
-											let ratio = (y - oldCorner.y)/(newCorner.y - oldCorner.y);	
-											let newTimeTaken = ratio*stepsTaken;
+										if((absStartVec.y <= y) && (y <= absEndVec.y)) {
+											let ratio = Math.abs((y - oldCorner.y)/(newCorner.y - oldCorner.y));	
+											console.log(ratio);
+											let newTimeTaken = ratio*stepsLeft;
 											if(newTimeTaken < stepsTaken) {
 												stepsTaken = newTimeTaken;
-												newVel.x = -this.vel.x;
+												if(actors[i].walls[j].type == "left") {
+													newVel.x = Math.abs(this.vel.x);
+												} else {
+													newVel.x = -Math.abs(this.vel.x);
+												}
 												newVel.y = this.vel.y;
 											}
 										}
 										break;
 									case "up":
 									case "down":
-										let yValue = actors[i].walls[j].startVec.y;
+										let yValue = absStartVec.y;
+										let x = (yValue-c)/m;
+										if((absStartVec.x <= x) && (x <= absEndVec.x)) {
+											let ratio = Math.abs((yValue - oldCorner.y)/(newCorner.y - oldCorner.y));	
+											let newTimeTaken = ratio*stepsLeft;
+											if(newTimeTaken < stepsTaken) {
+												stepsTaken = newTimeTaken;
+												newVel.x = this.vel.x;
+												if(actors[i].walls[j].type == "up") {
+													newVel.y = Math.abs(this.vel.y);
+												} else {
+													newVel.y = -Math.abs(this.vel.y);
+												}
+											}
+										}
 										break;
 								}
 
@@ -122,23 +143,21 @@ Ball.prototype.update = function(actors,step) {
 					}
 				}
 		}
+			//console.log(stepsTaken);
+			console.log(this.pos);
+			console.log(this.vel);
+			if(stepsTaken == 0) {
+				console.log("STEPS TAKEN IS 0");
+				this.pos.plus(this.vel.multiply(0.001));
+			  stepsLeft -= 0.001;
+				//break;
+			}
 
-			this.pos.plus(this.vel.multiply(stepsTaken));
+			this.pos.plus(this.vel.multiply(stepsTaken*100));
 			this.vel = newVel;
 			stepsLeft -= stepsTaken;
 		}
-		
-    //this.pos.plus(this.vel)
-    //actors.forEach(actor => {
-        //if (this === actor) {return}
-        //if (this.hasCollisionWith(actor)) {
-            //this.vel.y *= -1
-            //this.vel.x = 10*((this.pos.x-actor.pos.x)/actor.width)
-        //}
-    //})
-    //if (this.pos.x < 0 || this.pos.x > 400) {
-        //this.vel.x *= -1
-    //}
+	
 }
 
 Ball.prototype.hasCollisionWith = function(actor) {
@@ -159,6 +178,7 @@ Ball.prototype.outsideBounds = function() {
 
 Ball.prototype.respawn = function() {
 	this.pos = new Vector(200, 300);
+  this.vel =  new Vector(-4,-2);
 }
 
 Ball.prototype.log = function(data) {
@@ -176,6 +196,11 @@ function Paddle(initialPos, initialVel, id) {
     this.id = id
     this.type = "paddle"
 	  this.state = "stop"
+	  this.walls = [];
+	  this.walls.push(new Wall("down", new Vector(-PADDLE_WIDTH/2, -PADDLE_HEIGHT/2), new Vector(PADDLE_WIDTH/2, -PADDLE_HEIGHT/2)));
+	  this.walls.push(new Wall("left", new Vector(PADDLE_WIDTH/2, -PADDLE_HEIGHT/2), new Vector(PADDLE_WIDTH/2, PADDLE_HEIGHT/2)));
+	  this.walls.push(new Wall("right", new Vector(-PADDLE_WIDTH/2, -PADDLE_HEIGHT/2), new Vector(-PADDLE_WIDTH/2, PADDLE_HEIGHT/2)));
+	  this.walls.push(new Wall("up", new Vector(-PADDLE_WIDTH/2, PADDLE_HEIGHT/2), new Vector(PADDLE_WIDTH/2, PADDLE_HEIGHT/2)));
 }
 
 Paddle.prototype.update = function(actors,step) {
@@ -303,7 +328,7 @@ Game.prototype.getAI = function () {
 }
 
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(-4,2), "ball"));
+    this.spawnBall(new Ball(new Vector(200,300), new Vector(-4,-2), "ball"));
 
     this.ai = [{"timePassed": 2, "cmd": "left"}]
 		this.timePassed = 0;
