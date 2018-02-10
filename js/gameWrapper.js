@@ -34,10 +34,16 @@ let timeScalar = 1
 $(document).on("keydown",function (event) {
 	if (event.which == 32) {
 		timeScalar = 0.05
-	}
+	} 
+	if (event.which == 69) { //key e
+		timeScalar = 4
+	} 
 })
 $(document).on("keyup",function () {
 	if (event.which == 32) {
 		timeScalar = 1
 	}
+	if (event.which == 69) { //key e
+		timeScalar = 1
+	} 
 })

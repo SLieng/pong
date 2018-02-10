@@ -168,19 +168,6 @@ Ball.prototype.hasCollisionWith = function(actor) {
     return (xDistance<=totalWidth && yDistance<=totalHeight)
 }
 
-Ball.prototype.outsideBounds = function() {
-	//QUICK FIX
-	if(this.pos.y < 0 || this.pos.y > 600) {
-		return true;
-	}
-	return false;
-}
-
-Ball.prototype.respawn = function() {
-	this.pos = new Vector(200, 300);
-  this.vel =  new Vector(-4,-2);
-}
-
 Ball.prototype.log = function(data) {
 	data.pos = { x: null, y: null};
 	data.pos.x = this.pos.x;
@@ -224,16 +211,27 @@ Paddle.prototype.receiveCmd = function(command) {
 Paddle.prototype.cmdMoveLeft = function() {
 	this.vel = new Vector(-5,0);
 	this.state = "left";
+	this.warp();
 }
 
 Paddle.prototype.cmdMoveRight = function() {
 	this.vel = new Vector(5,0);
 	this.state = "right";
+	this.warp();
 }
 
 Paddle.prototype.cmdStop = function() {
 	this.vel = new Vector(0,0);
 	this.state = "stop";
+	this.warp();
+}
+
+Paddle.prototype.warp = function() {
+	if(this.pos.x < 0) {
+		this.pos.x = 400 - this.pos.x;
+	} else if(this.pos.x > 400) {
+		this.pos.x = this.pos.x - 400;
+	}
 }
 
 Paddle.prototype.log = function(data) {
@@ -266,23 +264,17 @@ Game.prototype.animate = function (step) {
         this.actors.forEach(actor => {
             actor.update(this.actors, step)
         })
-
-				/// TEMP
-				this.actors.forEach(actor => {
-					switch(actor.type) {
-						case "ball":	
-							if(actor.outsideBounds()) {
-								actor.respawn();
-								this.sendLog(this.frameData);
-								this.frameData = [];
-								this.timePassed = -step;
-							}
-							break;
-					}
-			});
 				this.timePassed += step;
         this.log();
     }
+
+	if(this.ballOutsideBounds()) {
+		this.respawnBall();
+		this.sendLog(this.frameData);
+		this.frameData = [];
+		this.timePassed = -step;
+
+	}
 }
 
 Game.prototype.log = function () {
@@ -328,13 +320,40 @@ Game.prototype.getAI = function () {
 }
 
 Game.prototype.begin = function () {
-    this.spawnBall(new Ball(new Vector(200,300), new Vector(-4,-2), "ball"));
+	  let initialVel = this.getBallStartVel()
+	  this.ball = new Ball(new Vector(200,300), initialVel, "ball");
+    this.spawnBall(this.ball);
 
     this.ai = [{"timePassed": 2, "cmd": "left"}]
 		this.timePassed = 0;
 	  this.frameData = [];
     
     this.active = true;
+}
+
+Game.prototype.getBallStartVel = function() {
+	let x,y;
+	if(Math.random() < 0.5) {
+		y = 2;
+	} else {
+		y = -2;
+	}
+
+	x = 8*Math.random() - 4;
+	return new Vector(x, y);
+}
+
+Game.prototype.ballOutsideBounds = function() {
+	//QUICK FIX
+	if(this.ball.pos.y < 0 || this.ball.pos.y > 600) {
+		return true;
+	}
+	return false;
+}
+
+Game.prototype.respawnBall = function() {
+	this.ball.pos = new Vector(200, 300);
+  this.ball.vel =  this.getBallStartVel();
 }
 
 Game.prototype.spawnBall = function(ball) {
