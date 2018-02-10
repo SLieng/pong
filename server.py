@@ -33,11 +33,8 @@ def transmit():
 @app.route('/receiver', methods=['POST'])
 def worker():
     global globalData
-
-    #print("HELLO")
     data = request.get_json()
-    print(data)
-    #result = ''
+    #print(data)
 
     globalData = []
 
