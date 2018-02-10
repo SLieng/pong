@@ -11,6 +11,9 @@ import pymysql
 
 app = Flask(__name__)
 
+RECORDING = False
+#RECORDING = True
+
 globalData = []
 numTrials = 0
 
@@ -38,6 +41,9 @@ def transmit():
 def worker():
     global globalData
     global numTrials
+
+    if RECORDING == False:
+        return ""
 
     data = request.get_json()
     #print(data)
