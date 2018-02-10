@@ -128,7 +128,9 @@ Ball.prototype.update = function(actors,step) {
 										if(newTimeTaken < stepsTaken) {
 											stepsTaken = newTimeTaken;
 											if(actors[i].type === "paddle") {
-												newVel.x = 5*(x-actors[i].pos.x)/Math.abs(absStartVec.x - absEndVec.x)
+												let paddleImpactPosition = (x-actors[i].pos.x)/Math.abs(absStartVec.x - absEndVec.x)
+												let sign = paddleImpactPosition>0? +1: -1
+												newVel.x = sign*(Math.pow(1+Math.abs(paddleImpactPosition),4)-1)
 											} else {
 												newVel.x = this.vel.x;
 											}
