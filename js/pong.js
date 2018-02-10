@@ -49,6 +49,7 @@ function Wall(type, startVec, endVec) { //(, left, right) or (, up, down) RELATI
 }
 
 function Field() {
+	this.type = "field";
 	this.pos = new Vector(0, 0);
 	this.walls = [new Wall("left", new Vector(0, 0), new Vector(0, 600)), new Wall("right", new Vector(400, 0), new Vector(400, 600))];
 }
@@ -276,12 +277,13 @@ Game.prototype.animate = function (step) {
 Game.prototype.log = function () {
   let newFrameEntry = {};
 
-	this.actors.forEach((actor) => {
+	for(let i=0; i<this.actors.length;i++) {
+		if(this.actors[i].type == "field") continue;
 		let data = {};
-		actor.log(data);
-		let key = actor.id;
+		this.actors[i].log(data);
+		let key = this.actors[i].id;
 		newFrameEntry[key] = data;
-	});
+	}
 
 	newFrameEntry.timePassed = this.timePassed;
 

@@ -36,7 +36,7 @@ def worker():
 
     #print("HELLO")
     data = request.get_json()
-    #print(data)
+    print(data)
     #result = ''
 
     globalData = []
