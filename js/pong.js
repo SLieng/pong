@@ -105,7 +105,6 @@ Ball.prototype.update = function(actors,step) {
 									let y = m*xValue + c;
 									if((absStartVec.y <= y) && (y <= absEndVec.y)) {
 										let ratio = Math.abs((y - oldCorner.y)/(newCorner.y - oldCorner.y));	
-										console.log(ratio);
 										let newTimeTaken = ratio*stepsLeft;
 										if(newTimeTaken < stepsTaken) {
 											stepsTaken = newTimeTaken;
@@ -143,11 +142,8 @@ Ball.prototype.update = function(actors,step) {
 					}
 				}
 			}
-			//console.log(stepsTaken);
-			console.log(this.pos);
-			console.log(this.vel);
 			if(stepsTaken == 0) {
-				console.log("STEPS TAKEN IS 0");
+				//console.log("STEPS TAKEN IS 0");
 				this.pos.plus(this.vel.multiply(0.0001));
 			  stepsLeft -= 0.001;
 				//break;
