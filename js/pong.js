@@ -127,7 +127,13 @@ Ball.prototype.update = function(actors,step) {
 										let newTimeTaken = ratio*stepsLeft;
 										if(newTimeTaken < stepsTaken) {
 											stepsTaken = newTimeTaken;
-											newVel.x = this.vel.x;
+											if(actors[i].type === "paddle") {
+												newVel.x = 5*(x-actors[i].pos.x)/Math.abs(absStartVec.x - absEndVec.x)
+											} else {
+												newVel.x = this.vel.x;
+											}
+											
+
 											if(actors[i].walls[j].type == "up" && corners[k].getDirections().includes("up")) {
 												newVel.y = Math.abs(this.vel.y);
 											} else if(actors[i].walls[j].type == "down" && corners[k].getDirections().includes("down")){
