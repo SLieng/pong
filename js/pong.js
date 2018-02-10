@@ -253,6 +253,7 @@ function Game() {
 Game.prototype.animate = function (step) {
     this.readKeyboardInput();
 		this.readAIInput();
+ 		this.cheatAIInput();
 	
 	if (this.active) {
         //OLD ACTORS ACT AS PREVIOUS STATE
@@ -388,4 +389,14 @@ Game.prototype.readAIInput = function () {
 	}
 
 	//console.log(this.paddle2.pos.x);
+}
+
+Game.prototype.cheatAIInput = function () {
+	if(this.paddle2.pos.x < this.ball.pos.x - 10) {
+		this.paddle2.receiveCmd("right");
+	} else if(this.paddle2.pos.x > this.ball.pos.x + 10) {
+		this.paddle2.receiveCmd("left");
+	} else {
+		this.paddle2.receiveCmd("stop");
+	}
 }
