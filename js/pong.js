@@ -148,7 +148,7 @@ Ball.prototype.update = function(actors,step) {
 			console.log(this.vel);
 			if(stepsTaken == 0) {
 				console.log("STEPS TAKEN IS 0");
-				this.pos.plus(this.vel.multiply(0.001));
+				this.pos.plus(this.vel.multiply(0.0001));
 			  stepsLeft -= 0.001;
 				//break;
 			}
