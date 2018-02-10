@@ -310,7 +310,7 @@ Game.prototype.getAI = function () {
 		url: "/transmit"
 	}).done(function(data) {
 		game.ai = JSON.parse(data);
-		//console.log(data);
+		console.log(data);
 		console.log("SUCCESS in getting AI");
 	});
 }
