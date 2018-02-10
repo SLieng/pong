@@ -42,6 +42,22 @@ CanvasDisplay.prototype.drawActors = function () {
             case "ball":
                 this.cx.fillStyle = "#FFFFFF";
                 this.cx.fillRect(pos.x - width/2, pos.y - height/2, width, height);
+
+                this.cx.strokeStyle = "#FFFF00"
+                this.cx.beginPath();
+                this.cx.moveTo(pos.x-width/2, pos.y-height/2)
+                this.cx.lineTo(pos.x-width/2+100*actor.vel.x, pos.y-height/2+100*actor.vel.y)
+
+                this.cx.moveTo(pos.x+width/2, pos.y-height/2)
+                this.cx.lineTo(pos.x+width/2+100*actor.vel.x, pos.y-height/2+100*actor.vel.y)
+
+                this.cx.moveTo(pos.x-width/2, pos.y+height/2)
+                this.cx.lineTo(pos.x-width/2+100*actor.vel.x, pos.y+height/2+100*actor.vel.y)
+
+                this.cx.moveTo(pos.x+width/2, pos.y+height/2)
+                this.cx.lineTo(pos.x+width/2+100*actor.vel.x, pos.y+height/2+100*actor.vel.y)
+
+                this.cx.stroke()
         }
     });
 };

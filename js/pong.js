@@ -72,77 +72,77 @@ function Ball(initialPos, initialVel, id) {
 }
 
 Ball.prototype.update = function(actors,step) {
-		let stepsLeft = step;
-	  while (stepsLeft > 0) {
-			directions = this.vel.getDirections();
+	let stepsLeft = step;
+	while (stepsLeft > 0) {
+		directions = this.vel.getDirections();
 
 
-			let stepsTaken = stepsLeft;
-			let newVel = new Vector(this.vel.x, this.vel.y);
-			let newPos = this.pos.getSum(this.vel.multiply(stepsLeft*100));
+		let stepsTaken = stepsLeft;
+		let newVel = new Vector(this.vel.x, this.vel.y);
+		let newPos = this.pos.getSum(this.vel.multiply(stepsLeft*100));
 
-			for(let i=0; i<actors.length; i++) {
-				if(actors[i] === this) continue;
-				if(actors[i].walls) {
-					for(let j=0; j<actors[i].walls.length; j++) {
-						if(directions.includes(actors[i].walls[j].type)) {
-							let corners = [new Vector(-BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(-BALL_RADIUS/2, BALL_RADIUS/2), new Vector(BALL_RADIUS/2, BALL_RADIUS/2)];
-							for(let k=0; k<corners.length; k++) {
-								let oldCorner = this.pos.getSum(corners[k]);
-								let newCorner = newPos.getSum(corners[k]);
+		for(let i=0; i<actors.length; i++) {
+			if(actors[i] === this) continue;
+			if(actors[i].walls) {
+				for(let j=0; j<actors[i].walls.length; j++) {
+					if(directions.includes(actors[i].walls[j].type)) {
+						let corners = [new Vector(-BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(BALL_RADIUS/2, -BALL_RADIUS/2), new Vector(-BALL_RADIUS/2, BALL_RADIUS/2), new Vector(BALL_RADIUS/2, BALL_RADIUS/2)];
+						for(let k=0; k<corners.length; k++) {
+							let oldCorner = this.pos.getSum(corners[k]);
+							let newCorner = newPos.getSum(corners[k]);
 
-								// y = mx + c
-								let m = (newCorner.y - oldCorner.y)/(newCorner.x - oldCorner.x);
-								let c = newCorner.y - m*newCorner.x;
+							// y = mx + c
+							let m = (newCorner.y - oldCorner.y)/(newCorner.x - oldCorner.x);
+							let c = newCorner.y - m*newCorner.x;
 
-								let absStartVec = actors[i].walls[j].startVec.getSum(actors[i].pos);
-								let absEndVec = actors[i].walls[j].endVec.getSum(actors[i].pos);
+							let absStartVec = actors[i].walls[j].startVec.getSum(actors[i].pos);
+							let absEndVec = actors[i].walls[j].endVec.getSum(actors[i].pos);
 
-								switch(actors[i].walls[j].type) {
-									case "left":
-									case "right":
-										let xValue = absStartVec.x;
-										let y = m*xValue + c;
-										if((absStartVec.y <= y) && (y <= absEndVec.y)) {
-											let ratio = Math.abs((y - oldCorner.y)/(newCorner.y - oldCorner.y));	
-											console.log(ratio);
-											let newTimeTaken = ratio*stepsLeft;
-											if(newTimeTaken < stepsTaken) {
-												stepsTaken = newTimeTaken;
-												if(actors[i].walls[j].type == "left") {
-													newVel.x = Math.abs(this.vel.x);
-												} else {
-													newVel.x = -Math.abs(this.vel.x);
-												}
-												newVel.y = this.vel.y;
+							switch(actors[i].walls[j].type) {
+								case "left":
+								case "right":
+									let xValue = absStartVec.x;
+									let y = m*xValue + c;
+									if((absStartVec.y <= y) && (y <= absEndVec.y)) {
+										let ratio = Math.abs((y - oldCorner.y)/(newCorner.y - oldCorner.y));	
+										console.log(ratio);
+										let newTimeTaken = ratio*stepsLeft;
+										if(newTimeTaken < stepsTaken) {
+											stepsTaken = newTimeTaken;
+											if(actors[i].walls[j].type == "left" && corners[k].getDirections().includes("left")) {
+												newVel.x = Math.abs(this.vel.x);
+											} else if (actors[i].walls[j].type == "right" && corners[k].getDirections().includes("right")) {
+												newVel.x = -Math.abs(this.vel.x);
+											}
+											newVel.y = this.vel.y;
+										}
+									}
+									break;
+								case "up":
+								case "down":
+									let yValue = absStartVec.y;
+									let x = (yValue-c)/m;
+									if((absStartVec.x <= x) && (x <= absEndVec.x)) {
+										let ratio = Math.abs((yValue - oldCorner.y)/(newCorner.y - oldCorner.y));	
+										let newTimeTaken = ratio*stepsLeft;
+										if(newTimeTaken < stepsTaken) {
+											stepsTaken = newTimeTaken;
+											newVel.x = this.vel.x;
+											if(actors[i].walls[j].type == "up" && corners[k].getDirections().includes("up")) {
+												newVel.y = Math.abs(this.vel.y);
+											} else if(actors[i].walls[j].type == "down" && corners[k].getDirections().includes("down")){
+												newVel.y = -Math.abs(this.vel.y);
 											}
 										}
-										break;
-									case "up":
-									case "down":
-										let yValue = absStartVec.y;
-										let x = (yValue-c)/m;
-										if((absStartVec.x <= x) && (x <= absEndVec.x)) {
-											let ratio = Math.abs((yValue - oldCorner.y)/(newCorner.y - oldCorner.y));	
-											let newTimeTaken = ratio*stepsLeft;
-											if(newTimeTaken < stepsTaken) {
-												stepsTaken = newTimeTaken;
-												newVel.x = this.vel.x;
-												if(actors[i].walls[j].type == "up") {
-													newVel.y = Math.abs(this.vel.y);
-												} else {
-													newVel.y = -Math.abs(this.vel.y);
-												}
-											}
-										}
-										break;
+									}
+									break;
 								}
 
 							}
 						}
 					}
 				}
-		}
+			}
 			//console.log(stepsTaken);
 			console.log(this.pos);
 			console.log(this.vel);
@@ -204,7 +204,7 @@ function Paddle(initialPos, initialVel, id) {
 }
 
 Paddle.prototype.update = function(actors,step) {
-    this.pos.plus(this.vel)
+    this.pos.plus(this.vel.multiply(step*100))
 }
 
 Paddle.prototype.receiveCmd = function(command) {

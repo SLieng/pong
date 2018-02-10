@@ -3,7 +3,7 @@ function runAnimation(frameFunc) {
 	function frame(time) {
 		let stop = false;
 		if (lastTime != null) {
-			let timeStep = Math.min(time - lastTime, 10) /1000;
+			let timeStep = Math.min(time - lastTime, 10) /1000*timeScalar
 			stop = frameFunc(timeStep) === false;
 		}
 		lastTime = time;
@@ -29,3 +29,15 @@ $(document).ready(function() {
 	console.log("START");
 	runPong();
 });
+
+let timeScalar = 1
+$(document).on("keydown",function (event) {
+	if (event.which == 32) {
+		timeScalar = 0.05
+	}
+})
+$(document).on("keyup",function () {
+	if (event.which == 32) {
+		timeScalar = 1
+	}
+})
