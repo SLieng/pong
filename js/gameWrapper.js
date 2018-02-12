@@ -3,10 +3,11 @@ function runAnimation(frameFunc) {
 	function frame(time) {
 		let stop = false;
 		if (lastTime != null) {
-			let timeStep = Math.min(time - lastTime, 10) /1000*timeScalar
+			let timeStep = Math.min(time - lastTime,10)/1000*timeScalar
 			stop = frameFunc(timeStep) === false;
 		}
 		lastTime = time;
+		
 		if(!stop) 
 			requestAnimationFrame(frame);
 	}
