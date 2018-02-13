@@ -27,7 +27,7 @@ Game.prototype.animate = function (step) {
         let oldActors = [...this.actors]
 
         this.actors.forEach(actor => {
-			actor.update(this.actors, step)
+			actor.update(oldActors, step)
         })
 		this.timePassed += step;
         this.log();
